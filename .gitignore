@@ -2,3 +2,4 @@
 **/temp
 **/*.draft.*
 **/nix-search
+**/build
