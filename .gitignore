@@ -1,0 +1,4 @@
+**/result
+**/temp
+**/*.draft.*
+**/nix-search
