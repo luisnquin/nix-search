@@ -1,0 +1,10 @@
+{
+    "nixos_elastic_search": {
+        "host": "https://search.nixos.org/backend",
+        "username": "aWVSALXpZv",
+        "password": "X8gPHnzL52wFEekuxsfQ9cSh"
+    },
+    "home_manager_options": {
+        "data_url": "https://mipmip.github.io/home-manager-option-search/data/options.json"
+    }
+}
