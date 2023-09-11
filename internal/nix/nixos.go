@@ -9,7 +9,7 @@ type Option struct {
 	Example *string `json:"example"`
 	// The default value of the NixOS option when not declared
 	// but root triggered.
-	Default string
+	Default string `json:"default"`
 	// The place in https://github.com/NixOS/nixpkgs where
 	// the NixOS option has been declared.
 	Source *string `json:"source"`
