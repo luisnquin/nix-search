@@ -19,7 +19,7 @@ type HomeManagerOption struct {
 type otherOption HomeManagerOption
 
 func (opt HomeManagerOption) String() string {
-	return fmt.Sprintf("%s\n%s\n\nType: %s\nDefault: %s\n", opt.Title, opt.Description, opt.Type, opt.Example)
+	return fmt.Sprintf("\n %s - %s\n Example: %s\n Default: %s\n", opt.Type, opt.Description, opt.Example, opt.Default)
 }
 
 func (option *HomeManagerOption) UnmarshalJSON(data []byte) error {

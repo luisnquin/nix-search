@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/luisnquin/nix-search/internal/nix"
+	"github.com/samber/lo"
 )
 
 type homeManagerOptionsData struct {
@@ -19,15 +20,18 @@ func (c *Client) SearchHomeManagerOptions(ctx context.Context, searchTerm string
 		return nil, err
 	}
 
-	var results []*nix.HomeManagerOption
+	searchTerm = strings.TrimSpace(searchTerm)
 
-	for _, option := range options {
-		if strings.HasPrefix(option.Title, searchTerm) {
-			results = append(results, option)
-		}
+	results := lo.Filter(options, func(option *nix.HomeManagerOption, _ int) bool {
+		return strings.HasPrefix(option.Type, searchTerm)
+	})
+	if len(results) > 0 {
+		return results, nil
 	}
 
-	return results, nil
+	return lo.Filter(options, func(option *nix.HomeManagerOption, _ int) bool {
+		return strings.Contains(option.Type, searchTerm)
+	}), nil
 }
 
 func (c *Client) getHomeManagerOptions(ctx context.Context) ([]*nix.HomeManagerOption, error) {
