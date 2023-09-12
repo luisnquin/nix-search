@@ -38,8 +38,8 @@ type nixPackageResponseItem struct {
 
 type nixPackagesResponse = searchResponse[nixPackageResponseItem]
 
-func (c Client) SearchPackages(ctx context.Context, channel, searchTerm string, maxCount int) ([]*nix.Package, error) {
-	response, err := c.searchPackages(ctx, channel, searchTerm, maxCount)
+func (c Client) SearchPackages(ctx context.Context, channelBranch, searchTerm string, maxCount int) ([]*nix.Package, error) {
+	response, err := c.searchPackages(ctx, channelBranch, searchTerm, maxCount)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (c Client) SearchPackages(ctx context.Context, channel, searchTerm string, 
 	return pkgs, nil
 }
 
-func (c Client) searchPackages(ctx context.Context, channel, searchTerm string, maxCount int) (nixPackagesResponse, error) {
+func (c Client) searchPackages(ctx context.Context, channelBranch, searchTerm string, maxCount int) (nixPackagesResponse, error) {
 	const query = // AQL
 	`
 	{
@@ -165,7 +165,11 @@ func (c Client) searchPackages(ctx context.Context, channel, searchTerm string, 
     }
 	`
 
-	esClient, err := c.prepareElasticSearchClient(channel)
+	if maxCount <= 0 || maxCount > MAX_RESULTS_COUNT {
+		maxCount = MAX_RESULTS_COUNT
+	}
+
+	esClient, err := c.prepareElasticSearchClient(channelBranch)
 	if err != nil {
 		return nixPackagesResponse{}, err
 	}

@@ -4,7 +4,6 @@ import "github.com/samber/lo"
 
 type (
 	NixConfig struct {
-		FlakesID       string       `json:"flakes_id"`
 		DefaultChannel string       `json:"default_channel"`
 		Channels       []NixChannel `json:"channels"`
 		Sources        NixSources   `json:"sources"`

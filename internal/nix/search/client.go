@@ -46,10 +46,10 @@ func NewClient(ctx context.Context, config *config.Config) (Client, error) {
 	}, nil
 }
 
-func (c Client) prepareElasticSearchClient(sourceId string) (*elasticsearch.Client, error) {
+func (c Client) prepareElasticSearchClient(indexBranch string) (*elasticsearch.Client, error) {
 	esConfig := c.config.Internal.Nix.Sources.ElasticSearch
 
-	indexParts := []string{INDEX_PREFIX, esConfig.MappingVersion, sourceId}
+	indexParts := []string{INDEX_PREFIX, esConfig.MappingVersion, indexBranch}
 	index := strings.Join(indexParts, "-")
 
 	return elasticsearch.NewClient(elasticsearch.Config{

@@ -16,8 +16,8 @@ type nixosOptionResponseItem struct {
 
 type nixosOptionsResponse = searchResponse[nixosOptionResponseItem]
 
-func (c Client) SearchNixOSOptions(ctx context.Context, channel, searchTerm string, maxCount int) ([]*nix.Option, error) {
-	response, err := c.searchNixOSOptions(ctx, channel, searchTerm, maxCount)
+func (c Client) SearchNixOSOptions(ctx context.Context, channelBranch, searchTerm string, maxCount int) ([]*nix.Option, error) {
+	response, err := c.searchNixOSOptions(ctx, channelBranch, searchTerm, maxCount)
 	if err != nil {
 		return nil, err
 	}
@@ -37,8 +37,8 @@ func (c Client) SearchNixOSOptions(ctx context.Context, channel, searchTerm stri
 	return options, nil
 }
 
-func (c Client) searchNixOSOptions(ctx context.Context, channel, searchTerm string, maxCount int) (nixosOptionsResponse, error) {
-	esClient, err := c.prepareElasticSearchClient(channel)
+func (c Client) searchNixOSOptions(ctx context.Context, channelBranch, searchTerm string, maxCount int) (nixosOptionsResponse, error) {
+	esClient, err := c.prepareElasticSearchClient(channelBranch)
 	if err != nil {
 		return searchResponse[nixosOptionResponseItem]{}, err
 	}
@@ -87,6 +87,10 @@ func (c Client) searchNixOSOptions(ctx context.Context, channel, searchTerm stri
 		}
 	}
 	`
+
+	if maxCount <= 0 || maxCount > MAX_RESULTS_COUNT {
+		maxCount = MAX_RESULTS_COUNT
+	}
 
 	response, err := esClient.Search(
 		esClient.Search.WithFrom(0),
