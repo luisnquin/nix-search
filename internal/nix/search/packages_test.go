@@ -5,20 +5,27 @@ import (
 	"testing"
 
 	"github.com/luisnquin/nix-search/internal/config"
+	"github.com/luisnquin/nix-search/internal/nix"
 	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 )
 
 func TestPackagesSmoke(t *testing.T) {
-	const TEST_CHANNEL = "latest-42-nixos-unstable"
+	ctx, appConfig := context.Background(), config.Load()
 
-	ctx, config := context.Background(), config.Load()
-
-	client, err := nix_search.NewClient(ctx, config)
+	client, err := nix_search.NewClient(ctx, appConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	options, err := client.SearchPackages(ctx, TEST_CHANNEL, "go", 50)
+	channelStatus := nix.CHANNEL_STATUS_ROLLING
+
+	channel, found := appConfig.Internal.Nix.FindChannelWithStatus(channelStatus)
+	if !found {
+		t.Errorf("unable to find channel with %s status", channelStatus)
+		t.FailNow()
+	}
+
+	options, err := client.SearchPackages(ctx, channel.Branch, "go", 50)
 	if err != nil {
 		t.Fatal(err)
 	}

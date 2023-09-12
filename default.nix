@@ -11,22 +11,27 @@ pkgs.buildGoModule rec {
   };
 
   preConfigure = let
-    config =
-      {
-        elastic_search = {
-          host = "https://search.nixos.org/backend";
-          username = "aWVSALXpZv";
-          password = "X8gPHnzL52wFEekuxsfQ9cSh";
-          mapping_version = toString elasticSearchMappingVersion;
-        };
+    internal-config = {
+      nix =
+        {
+          flakes_id = "group-manual";
+          sources = {
+            home_manager_options = {
+              url = "https://mipmip.github.io/home-manager-option-search/data/options.json";
+            };
 
-        home_manager = {
-          data_url = "https://mipmip.github.io/home-manager-option-search/data/options.json";
-        };
-      }
-      // nixosChannels;
+            elastic_search = {
+              url = "https://search.nixos.org/backend";
+              username = "aWVSALXpZv";
+              password = "X8gPHnzL52wFEekuxsfQ9cSh";
+              mapping_version = toString elasticSearchMappingVersion;
+            };
+          };
+        }
+        // nixosChannels;
+    };
   in ''
-    echo '${builtins.toJSON config}' > $PWD/internal/config/internal.config.json
+    echo '${builtins.toJSON internal-config}' > $PWD/internal/config/internal.config.json
   '';
 
   vendorHash = "sha256-UBqN1SGbi9aQdFJZie2gV5oQimm5s8lFVNIFyptE6Qk=";

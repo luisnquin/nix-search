@@ -1,14 +1,31 @@
 {
-    "channels": [
-        { "branch": "nixos-23.05", "id": "23.05", "jobset": "nixos/release-23.05", "status": "stable" },
-        { "branch": "nixos-unstable", "id": "unstable", "jobset": "nixos/trunk-combined", "status": "rolling" }
-    ],
-    "default_channel": "23.05",
-    "elastic_search": {
-        "host": "https://search.nixos.org/backend",
-        "mapping_version": "42",
-        "password": "X8gPHnzL52wFEekuxsfQ9cSh",
-        "username": "aWVSALXpZv"
-    },
-    "home_manager": { "data_url": "https://mipmip.github.io/home-manager-option-search/data/options.json" }
+    "nix": {
+        "flakes_id": "group-manual",
+        "default_channel": "23.05",
+        "channels": [
+            {
+                "id": "23.05",
+                "branch": "nixos-23.05",
+                "jobset": "nixos/release-23.05",
+                "status": "stable"
+            },
+            {
+                "id": "unstable",
+                "branch": "nixos-unstable",
+                "jobset": "nixos/trunk-combined",
+                "status": "rolling"
+            }
+        ],
+        "sources": {
+            "home_manager_options": {
+                "url": "https://mipmip.github.io/home-manager-option-search/data/options.json"
+            },
+            "elastic_search": {
+                "url": "https://search.nixos.org/backend",
+                "password": "X8gPHnzL52wFEekuxsfQ9cSh",
+                "username": "aWVSALXpZv",
+                "mapping_version": "42"
+            }
+        }
+    }
 }

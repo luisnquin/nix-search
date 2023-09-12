@@ -46,13 +46,18 @@ func NewClient(ctx context.Context, config *config.Config) (Client, error) {
 	}, nil
 }
 
-func (c Client) prepareElasticSearchClient(channel string) (*elasticsearch.Client, error) {
+func (c Client) prepareElasticSearchClient(sourceId string) (*elasticsearch.Client, error) {
+	esConfig := c.config.Internal.Nix.Sources.ElasticSearch
+
+	indexParts := []string{INDEX_PREFIX, esConfig.MappingVersion, sourceId}
+	index := strings.Join(indexParts, "-")
+
 	return elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{
-			fmt.Sprintf("%s/%s", c.config.Internal.ElasticSearch.Host, channel),
+			fmt.Sprintf("%s/%s", esConfig.URL, index),
 		},
-		Username: c.config.Internal.ElasticSearch.Username,
-		Password: c.config.Internal.ElasticSearch.Password,
+		Username: esConfig.Username,
+		Password: esConfig.Password,
 	})
 }
 

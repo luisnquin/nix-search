@@ -33,6 +33,8 @@ type (
 	}
 )
 
+const INDEX_PREFIX = "latest"
+
 func parseSearchResponse[responseItem any](r io.Reader) (searchResponse[responseItem], error) {
 	var response searchResponse[responseItem]
 
