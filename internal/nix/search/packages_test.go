@@ -12,10 +12,7 @@ import (
 func TestPackagesSmoke(t *testing.T) {
 	ctx, appConfig := context.Background(), config.Load()
 
-	client, err := nix_search.NewClient(ctx, appConfig)
-	if err != nil {
-		t.Fatal(err)
-	}
+	client := nix_search.NewClient(appConfig)
 
 	channelStatus := nix.CHANNEL_STATUS_ROLLING
 

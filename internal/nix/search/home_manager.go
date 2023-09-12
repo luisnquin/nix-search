@@ -1,8 +1,8 @@
 package nix_search
 
 import (
+	"context"
 	"encoding/json"
-	"net/http"
 	"strings"
 
 	"github.com/luisnquin/nix-search/internal/nix"
@@ -13,46 +13,42 @@ type homeManagerOptionsData struct {
 	Options    []*nix.HomeManagerOption `json:"options"`
 }
 
-func (c *Client) SearchHomeManagerOptions(searchTerm string) []*nix.HomeManagerOption {
-	c.homeManager.Do(c.tryToFetchHomeManagerOptions)
+func (c *Client) SearchHomeManagerOptions(ctx context.Context, searchTerm string) ([]*nix.HomeManagerOption, error) {
+	options, err := c.getHomeManagerOptions(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	var results []*nix.HomeManagerOption
 
-	for _, option := range c.homeManager.data.Options {
+	for _, option := range options {
 		if strings.HasPrefix(option.Title, searchTerm) {
 			results = append(results, option)
 		}
 	}
 
-	return results
+	return results, nil
 }
 
-func (c *Client) tryToFetchHomeManagerOptions() {
-	c.homeManager.mu.Lock()
-	defer c.homeManager.mu.Unlock()
+func (c *Client) getHomeManagerOptions(ctx context.Context) ([]*nix.HomeManagerOption, error) {
+	var err error
 
-	data, err := c.fetchHomeManagerOptions()
+	c.store.homeManagerShell.Once.Do(func() {
+		c.store.homeManagerShell.data, err = c.fetchHomeManagerOptions()
+	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	c.homeManager.data = data
+	return c.store.homeManagerShell.data.Options, nil
 }
 
-func (c Client) fetchHomeManagerOptions() (homeManagerOptionsData, error) {
-	httpClient := http.Client{Timeout: CLIENT_TIMEOUT}
+func (c Client) fetchHomeManagerOptions() (*homeManagerOptionsData, error) {
 	optionsUrl := c.config.Internal.Nix.Sources.HomeManagerOptions.URL
 
-	r, err := http.NewRequest(http.MethodGet, optionsUrl, http.NoBody)
+	response, err := doGET(optionsUrl)
 	if err != nil {
-		return homeManagerOptionsData{}, err
-	}
-
-	defer r.Body.Close()
-
-	response, err := httpClient.Do(r)
-	if err != nil {
-		return homeManagerOptionsData{}, err
+		return nil, err
 	}
 
 	defer response.Body.Close()
@@ -60,8 +56,8 @@ func (c Client) fetchHomeManagerOptions() (homeManagerOptionsData, error) {
 	var data homeManagerOptionsData
 
 	if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
-		return homeManagerOptionsData{}, err
+		return nil, err
 	}
 
-	return data, err
+	return &data, err
 }

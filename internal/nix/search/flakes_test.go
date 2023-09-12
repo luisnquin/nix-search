@@ -9,12 +9,9 @@ import (
 )
 
 func TestFlakeOptionsSmoke(t *testing.T) {
-	ctx, config := context.Background(), config.Load()
+	ctx, appConfig := context.Background(), config.Load()
 
-	client, err := nix_search.NewClient(ctx, config)
-	if err != nil {
-		t.Fatal(err)
-	}
+	client := nix_search.NewClient(appConfig)
 
 	options, err := client.SearchFlakeOptions(ctx, "wayland", 50)
 	if err != nil {
@@ -27,12 +24,9 @@ func TestFlakeOptionsSmoke(t *testing.T) {
 }
 
 func TestFlakePackagesSmoke(t *testing.T) {
-	ctx, config := context.Background(), config.Load()
+	ctx, appConfig := context.Background(), config.Load()
 
-	client, err := nix_search.NewClient(ctx, config)
-	if err != nil {
-		t.Fatal(err)
-	}
+	client := nix_search.NewClient(appConfig)
 
 	options, err := client.SearchFlakePackages(ctx, "wayland", 50)
 	if err != nil {

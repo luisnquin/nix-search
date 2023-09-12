@@ -2,10 +2,10 @@ package nix_search
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"html/template"
 	"io"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -18,13 +18,15 @@ import (
 type (
 	Client struct {
 		config *config.Config
-
-		homeManager homeManager
+		store  store
 	}
 
-	homeManager struct {
-		data homeManagerOptionsData
-		mu   *sync.Mutex
+	store struct {
+		homeManagerShell homeManagerShell
+	}
+
+	homeManagerShell struct {
+		data *homeManagerOptionsData
 		*sync.Once
 	}
 )
@@ -36,14 +38,15 @@ const (
 	DEFAULT_SEARCH_QUERY_AGGREGATION_SIZE = 20
 )
 
-func NewClient(ctx context.Context, config *config.Config) (Client, error) {
+func NewClient(config *config.Config) Client {
 	return Client{
-		homeManager: homeManager{
-			Once: new(sync.Once),
-			mu:   new(sync.Mutex),
-		},
 		config: config,
-	}, nil
+		store: store{
+			homeManagerShell: homeManagerShell{
+				Once: new(sync.Once),
+			},
+		},
+	}
 }
 
 func (c Client) prepareElasticSearchClient(indexBranch string) (*elasticsearch.Client, error) {
@@ -80,4 +83,17 @@ func prepareQuery(rawQuery, searchTerm string) io.Reader {
 	}
 
 	return &b
+}
+
+func doGET(url string) (*http.Response, error) {
+	httpClient := http.Client{Timeout: CLIENT_TIMEOUT}
+
+	r, err := http.NewRequest(http.MethodGet, url, http.NoBody)
+	if err != nil {
+		return nil, err
+	}
+
+	defer r.Body.Close()
+
+	return httpClient.Do(r)
 }

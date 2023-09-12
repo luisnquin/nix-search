@@ -5,20 +5,24 @@ import (
 	"testing"
 
 	"github.com/luisnquin/nix-search/internal/config"
+	"github.com/luisnquin/nix-search/internal/nix"
 	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 )
 
 func TestNixOSOptionsSmoke(t *testing.T) {
-	const TEST_CHANNEL = "latest-42-nixos-unstable"
+	ctx, appConfig := context.Background(), config.Load()
 
-	ctx, config := context.Background(), config.Load()
+	client := nix_search.NewClient(appConfig)
 
-	client, err := nix_search.NewClient(ctx, config)
-	if err != nil {
-		t.Fatal(err)
+	channelStatus := nix.CHANNEL_STATUS_STABLE
+
+	channel, found := appConfig.Internal.Nix.FindChannelWithStatus(channelStatus)
+	if !found {
+		t.Errorf("unable to find channel with %s status", channelStatus)
+		t.FailNow()
 	}
 
-	options, err := client.SearchNixOSOptions(ctx, TEST_CHANNEL, "services.postgresql", 50)
+	options, err := client.SearchNixOSOptions(ctx, channel.Branch, "services.postgresql", 50)
 	if err != nil {
 		t.Fatal(err)
 	}

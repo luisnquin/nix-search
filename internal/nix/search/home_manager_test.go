@@ -9,14 +9,19 @@ import (
 )
 
 func TestHomeManagerTest(t *testing.T) {
-	ctx, config := context.Background(), config.Load()
+	ctx, appConfig := context.Background(), config.Load()
 
-	client, err := nix_search.NewClient(ctx, config)
+	client := nix_search.NewClient(appConfig)
+
+	options, err := client.SearchHomeManagerOptions(ctx, "programs.go")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	options := client.SearchHomeManagerOptions("programs.go")
+	client.SearchHomeManagerOptions(ctx, "programs.bat")
+
+	client.SearchHomeManagerOptions(ctx, "programs.wayland")
+	client.SearchHomeManagerOptions(ctx, "programs.vscode")
 
 	for _, option := range options {
 		t.Log(option.Title)
