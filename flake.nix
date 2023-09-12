@@ -23,7 +23,7 @@
             inherit system;
           };
 
-          elasticSearchMappingVersion = lib.fileContents (import "${nixos-search}/VERSION");
+          elasticSearchMappingVersion = lib.fileContents "${nixos-search}/VERSION";
           lib = nixpkgs.lib;
 
           nixosChannels = let
@@ -53,7 +53,7 @@
                 }
               )
               filteredChannels;
-            default =
+            default_channel =
               builtins.head
               (
                 builtins.sort (e1: e2: ! (builtins.lessThan e1 e2))

@@ -49,10 +49,10 @@ func NewClient(ctx context.Context, config *config.Config) (Client, error) {
 func (c Client) prepareElasticSearchClient(channel string) (*elasticsearch.Client, error) {
 	return elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{
-			fmt.Sprintf("%s/%s", c.config.Internal.NixOSElasticSearch.Host, channel),
+			fmt.Sprintf("%s/%s", c.config.Internal.ElasticSearch.Host, channel),
 		},
-		Username: c.config.Internal.NixOSElasticSearch.Username,
-		Password: c.config.Internal.NixOSElasticSearch.Password,
+		Username: c.config.Internal.ElasticSearch.Username,
+		Password: c.config.Internal.ElasticSearch.Password,
 	})
 }
 

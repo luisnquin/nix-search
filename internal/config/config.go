@@ -11,22 +11,32 @@ type Config struct {
 
 type (
 	InternalConfig struct {
-		NixOSElasticSearch NixOSElasticSearchConfig `json:"nixos_elastic_search"`
-		HomeManagerOptions HomeManagerOptionsConfig `json:"home_manager_options"`
+		ElasticSearch  ElasticSearchConfig `json:"elastic_search"`
+		HomeManager    HomeManagerConfig   `json:"home_manager_options"`
+		DefaultChannel string              `json:"default_channel"`
+		Channels       []NixChannel        `json:"channels"`
 	}
 
-	NixOSElasticSearchConfig struct {
-		Host     string `json:"host"`
-		Username string `json:"username"`
-		Password string `json:"password"`
+	NixChannel struct {
+		ID     string `json:"id"`
+		Branch string `json:"branch"`
+		JobSet string `json:"jobset"`
+		Status string `json:"status"`
 	}
 
-	HomeManagerOptionsConfig struct {
+	ElasticSearchConfig struct {
+		Host           string `json:"host"`
+		Username       string `json:"username"`
+		Password       string `json:"password"`
+		MappingVersion string `json:"mapping_version"`
+	}
+
+	HomeManagerConfig struct {
 		DataURL string `json:"data_url"`
 	}
 )
 
-//go:embed internal-config.json
+//go:embed internal.config.json
 var internalConfig []byte
 
 func Load() *Config {

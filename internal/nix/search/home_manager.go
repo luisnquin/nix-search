@@ -41,7 +41,7 @@ func (c *Client) tryToFetchHomeManagerOptions() {
 
 func (c Client) fetchHomeManagerOptions() (homeManagerOptionsData, error) {
 	httpClient := http.Client{Timeout: CLIENT_TIMEOUT}
-	url := c.config.Internal.HomeManagerOptions.DataURL
+	url := c.config.Internal.HomeManager.DataURL
 
 	r, err := http.NewRequest(http.MethodGet, url, http.NoBody)
 	if err != nil {

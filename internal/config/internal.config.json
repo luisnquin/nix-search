@@ -1,0 +1,14 @@
+{
+    "channels": [
+        { "branch": "nixos-23.05", "id": "23.05", "jobset": "nixos/release-23.05", "status": "stable" },
+        { "branch": "nixos-unstable", "id": "unstable", "jobset": "nixos/trunk-combined", "status": "rolling" }
+    ],
+    "default_channel": "23.05",
+    "elastic_search": {
+        "host": "https://search.nixos.org/backend",
+        "mapping_version": "42",
+        "password": "X8gPHnzL52wFEekuxsfQ9cSh",
+        "username": "aWVSALXpZv"
+    },
+    "home_manager": { "data_url": "https://mipmip.github.io/home-manager-option-search/data/options.json" }
+}
