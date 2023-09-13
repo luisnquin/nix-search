@@ -70,16 +70,16 @@ func (a App) run(ctx context.Context) error {
 
 	builder.Add(
 		grid.RowHeightPerc(99,
-			grid.RowHeightFixed(20,
+			grid.RowHeightFixed(5,
 				grid.Widget(
 					a.searchInput,
+					container.Border(linestyle.Light),
 					container.AlignHorizontal(align.HorizontalCenter),
-					container.AlignVertical(align.VerticalBottom),
-					container.MarginBottom(1),
 					container.Focused(),
+					container.PaddingLeft(1),
 				),
 			),
-			grid.RowHeightPerc(50,
+			grid.RowHeightPerc(90,
 				grid.Widget(
 					a.resultsBoard,
 					container.Border(linestyle.Light),
@@ -118,9 +118,10 @@ func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
 	ctx := context.Background()
 
 	return textinput.New(
-		textinput.Label("What do you want to search:", cell.FgColor(cell.ColorNumber(33))),
-		textinput.Border(linestyle.Light),
+		textinput.Label("What do you want to search: ", cell.FgColor(cell.ColorAqua)),
+		textinput.Border(linestyle.None),
 		textinput.PlaceHolder("Enter any text"),
+		textinput.FillColor(cell.ColorDefault),
 		textinput.ExclusiveKeyboardOnFocus(),
 		textinput.OnSubmit(func(text string) error {
 			options, err := a.nixClient.SearchHomeManagerOptions(ctx, text)
