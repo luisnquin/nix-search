@@ -24,28 +24,61 @@ import (
 	"github.com/samber/lo"
 )
 
-type App struct {
-	nixClient *nix_search.Client
+type (
+	App struct {
+		nixClient *nix_search.Client
 
-	searchInput  *textinput.TextInput
-	resultsBoard *text.Text
-}
+		currentSearchTab *searchTabConfig
+		elements
+	}
+
+	elements struct {
+		searchInput   *textinput.TextInput
+		resultsBoard  *text.Text
+		currentLabel  *text.Text
+		currentStatus *text.Text
+		currentSource *text.Text
+		searchOptions *text.Text
+	}
+)
 
 func New(config *config.Config) (App, error) {
 	app := App{
 		nixClient: nix_search.NewClient(config),
 	}
 
+	app.currentSearchTab = app.getDefaultSearchTab()
+
 	var err error
 
-	app.resultsBoard, err = app.getResultsBoard()
+	app.elements.resultsBoard, err = app.getResultsBoard()
 	if err != nil {
-		return App{}, fmt.Errorf("unable to create results board: %w", err)
+		return App{}, fmt.Errorf("results board: %w", err)
 	}
 
-	app.searchInput, err = app.getSearchTextInput()
+	app.elements.searchInput, err = app.getSearchTextInput()
 	if err != nil {
-		return App{}, fmt.Errorf("unable to create search input: %w", err)
+		return App{}, fmt.Errorf("search input: %w", err)
+	}
+
+	app.elements.currentStatus, err = app.getCurrentStatusWidget()
+	if err != nil {
+		return App{}, fmt.Errorf("current status widget: %w", err)
+	}
+
+	app.elements.currentLabel, err = app.getCurrentLabelWidget()
+	if err != nil {
+		return App{}, fmt.Errorf("current label widget: %w", err)
+	}
+
+	app.elements.searchOptions, err = app.getSearchOptionsWidget()
+	if err != nil {
+		return App{}, fmt.Errorf("search options widget: %w", err)
+	}
+
+	app.elements.currentSource, err = app.getCurrentSourceWidget()
+	if err != nil {
+		return App{}, fmt.Errorf("current source widget: %w", err)
 	}
 
 	return app, nil
@@ -72,20 +105,49 @@ func (a App) run(ctx context.Context) error {
 		grid.RowHeightPerc(99,
 			grid.RowHeightFixed(5,
 				grid.Widget(
-					a.searchInput,
+					a.elements.searchInput,
 					container.Border(linestyle.Light),
 					container.AlignHorizontal(align.HorizontalCenter),
 					container.Focused(),
 					container.PaddingLeft(1),
 				),
 			),
-			grid.RowHeightPerc(90,
+			grid.RowHeightPerc(6,
+				grid.ColWidthPerc(30,
+					grid.Widget(
+						a.elements.currentLabel,
+						container.BorderTitle("Current tab"),
+						container.Border(linestyle.Light),
+						container.BorderColor(cell.ColorMagenta),
+					)),
+				grid.ColWidthPerc(15,
+					grid.Widget(
+						a.elements.currentStatus,
+						container.BorderTitle("Status"),
+						container.Border(linestyle.Light),
+						container.BorderColor(cell.ColorGreen),
+					)),
+				grid.ColWidthPerc(55,
+					grid.Widget(
+						a.elements.currentSource,
+						container.BorderTitle("Source"),
+						container.Border(linestyle.Light),
+						container.BorderColor(cell.ColorNavy),
+					),
+				)),
+			grid.RowHeightPerc(87,
 				grid.Widget(
-					a.resultsBoard,
+					a.elements.resultsBoard,
 					container.Border(linestyle.Light),
 					container.BorderTitle("Search results"),
-					container.AlignHorizontal(align.HorizontalCenter),
-					container.AlignHorizontal(align.Horizontal(align.VerticalBottom)),
+					container.BorderColor(cell.ColorAqua),
+				),
+			),
+			grid.RowHeightPerc(3,
+				grid.Widget(
+					a.elements.searchOptions,
+					container.Border(linestyle.Light),
+					container.BorderTitle("Nix options"),
 					container.BorderColor(cell.ColorAqua),
 				),
 			),
@@ -117,10 +179,12 @@ func (a App) run(ctx context.Context) error {
 func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
 	ctx := context.Background()
 
+	
+
 	return textinput.New(
-		textinput.Label("What do you want to search: ", cell.FgColor(cell.ColorAqua)),
+		textinput.Label(a.currentSearchTab.Prompt, cell.FgColor(cell.ColorAqua)),
 		textinput.Border(linestyle.None),
-		textinput.PlaceHolder("Enter any text"),
+		textinput.PlaceHolder("enter any text"),
 		textinput.FillColor(cell.ColorDefault),
 		textinput.ExclusiveKeyboardOnFocus(),
 		textinput.OnSubmit(func(text string) error {
@@ -146,7 +210,34 @@ func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
 }
 
 func (a App) getResultsBoard() (*text.Text, error) {
-	return text.New(
-		text.WrapAtWords(),
-	)
+	return text.New(text.WrapAtWords())
+}
+
+func (a App) getCurrentLabelWidget() (*text.Text, error) {
+	return a.newTextWidget(a.currentSearchTab.Label)
+}
+
+func (a App) getCurrentStatusWidget() (*text.Text, error) {
+	return a.newTextWidget(a.currentSearchTab.State, text.WriteCellOpts(cell.Bold()))
+}
+
+func (a App) getCurrentSourceWidget() (*text.Text, error) {
+	return a.newTextWidget(a.currentSearchTab.Source, text.WriteCellOpts(cell.Bold()))
+}
+
+func (a App) getSearchOptionsWidget() (*text.Text, error) {
+	tabs := lo.Map(a.getSearchTabs(), func(tab searchTabConfig, _ int) string {
+		return tab.Label
+	})
+
+	return a.newTextWidget(strings.Join(tabs, " | "))
+}
+
+func (a App) newTextWidget(content string, tOpts ...text.WriteOption) (*text.Text, error) {
+	t, err := text.New(text.DisableScrolling())
+	if err != nil {
+		return nil, err
+	}
+
+	return t, t.Write(content, tOpts...)
 }
