@@ -2,13 +2,9 @@ package app
 
 import (
 	"context"
-	"fmt"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/luisnquin/nix-search/internal/config"
-	"github.com/luisnquin/nix-search/internal/nix"
 	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 	"github.com/mum4k/termdash"
 	"github.com/mum4k/termdash/align"
@@ -49,36 +45,8 @@ func New(config *config.Config) (App, error) {
 
 	app.currentSearchTab = app.getDefaultSearchTab()
 
-	var err error
-
-	app.elements.resultsBoard, err = app.getResultsBoard()
-	if err != nil {
-		return App{}, fmt.Errorf("results board: %w", err)
-	}
-
-	app.elements.searchInput, err = app.getSearchTextInput()
-	if err != nil {
-		return App{}, fmt.Errorf("search input: %w", err)
-	}
-
-	app.elements.currentStatus, err = app.getCurrentStatusWidget()
-	if err != nil {
-		return App{}, fmt.Errorf("current status widget: %w", err)
-	}
-
-	app.elements.currentLabel, err = app.getCurrentLabelWidget()
-	if err != nil {
-		return App{}, fmt.Errorf("current label widget: %w", err)
-	}
-
-	app.elements.searchOptions, err = app.getSearchOptionsWidget()
-	if err != nil {
-		return App{}, fmt.Errorf("search options widget: %w", err)
-	}
-
-	app.elements.currentSource, err = app.getCurrentSourceWidget()
-	if err != nil {
-		return App{}, fmt.Errorf("current source widget: %w", err)
+	if err := app.initWidgets(); err != nil {
+		return App{}, err
 	}
 
 	return app, nil
@@ -88,7 +56,7 @@ func (a App) Run(ctx context.Context) error {
 	return a.run(ctx)
 }
 
-func (a App) run(ctx context.Context) error {
+func (app App) run(ctx context.Context) error {
 	t, err := tcell.New()
 	if err != nil {
 		return err
@@ -105,7 +73,7 @@ func (a App) run(ctx context.Context) error {
 		grid.RowHeightPerc(99,
 			grid.RowHeightFixed(5,
 				grid.Widget(
-					a.elements.searchInput,
+					app.elements.searchInput,
 					container.Border(linestyle.Light),
 					container.AlignHorizontal(align.HorizontalCenter),
 					container.Focused(),
@@ -115,21 +83,21 @@ func (a App) run(ctx context.Context) error {
 			grid.RowHeightPerc(6,
 				grid.ColWidthPerc(30,
 					grid.Widget(
-						a.elements.currentLabel,
+						app.elements.currentLabel,
 						container.BorderTitle("Current tab"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorMagenta),
 					)),
 				grid.ColWidthPerc(15,
 					grid.Widget(
-						a.elements.currentStatus,
+						app.elements.currentStatus,
 						container.BorderTitle("Status"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorGreen),
 					)),
 				grid.ColWidthPerc(55,
 					grid.Widget(
-						a.elements.currentSource,
+						app.elements.currentSource,
 						container.BorderTitle("Source"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorNavy),
@@ -137,7 +105,7 @@ func (a App) run(ctx context.Context) error {
 				)),
 			grid.RowHeightPerc(87,
 				grid.Widget(
-					a.elements.resultsBoard,
+					app.elements.resultsBoard,
 					container.Border(linestyle.Light),
 					container.BorderTitle("Search results"),
 					container.BorderColor(cell.ColorAqua),
@@ -145,7 +113,7 @@ func (a App) run(ctx context.Context) error {
 			),
 			grid.RowHeightPerc(3,
 				grid.Widget(
-					a.elements.searchOptions,
+					app.elements.searchOptions,
 					container.Border(linestyle.Light),
 					container.BorderTitle("Nix options"),
 					container.BorderColor(cell.ColorAqua),
@@ -166,78 +134,20 @@ func (a App) run(ctx context.Context) error {
 
 	termOptions := []termdash.Option{
 		termdash.KeyboardSubscriber(func(k *terminalapi.Keyboard) {
-			if lo.Contains([]keyboard.Key{keyboard.KeyEsc, keyboard.KeyCtrlC}, k.Key) {
+			switch { // keyboard.KeyEsc
+			case lo.Contains([]keyboard.Key{keyboard.KeyCtrlC}, k.Key):
 				cancel()
+			case k.Key == keyboard.KeyCtrlLsqBracket:
+				app.previousTab()
+				app.updateWidgetTexts()
+
+			case k.Key == keyboard.KeyCtrlRsqBracket:
+				app.nextTab()
+				app.updateWidgetTexts()
 			}
 		}),
 		termdash.RedrawInterval(500 * time.Millisecond),
 	}
 
 	return termdash.Run(ctx, t, c, termOptions...)
-}
-
-func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
-	ctx := context.Background()
-
-	
-
-	return textinput.New(
-		textinput.Label(a.currentSearchTab.Prompt, cell.FgColor(cell.ColorAqua)),
-		textinput.Border(linestyle.None),
-		textinput.PlaceHolder("enter any text"),
-		textinput.FillColor(cell.ColorDefault),
-		textinput.ExclusiveKeyboardOnFocus(),
-		textinput.OnSubmit(func(text string) error {
-			options, err := a.nixClient.SearchHomeManagerOptions(ctx, text)
-			if err != nil {
-				uerr, ok := err.(*url.Error)
-				if ok && uerr.Timeout() {
-					return nil
-				}
-
-				return err // TODO: send to terminal screen and do not display context cancelled error
-			}
-
-			results := strings.Join(lo.Map(options, func(opt *nix.HomeManagerOption, _ int) string {
-				return opt.String()
-			}), " ")
-
-			a.resultsBoard.Reset()
-			a.resultsBoard.Write(results)
-
-			return nil
-		}))
-}
-
-func (a App) getResultsBoard() (*text.Text, error) {
-	return text.New(text.WrapAtWords())
-}
-
-func (a App) getCurrentLabelWidget() (*text.Text, error) {
-	return a.newTextWidget(a.currentSearchTab.Label)
-}
-
-func (a App) getCurrentStatusWidget() (*text.Text, error) {
-	return a.newTextWidget(a.currentSearchTab.State, text.WriteCellOpts(cell.Bold()))
-}
-
-func (a App) getCurrentSourceWidget() (*text.Text, error) {
-	return a.newTextWidget(a.currentSearchTab.Source, text.WriteCellOpts(cell.Bold()))
-}
-
-func (a App) getSearchOptionsWidget() (*text.Text, error) {
-	tabs := lo.Map(a.getSearchTabs(), func(tab searchTabConfig, _ int) string {
-		return tab.Label
-	})
-
-	return a.newTextWidget(strings.Join(tabs, " | "))
-}
-
-func (a App) newTextWidget(content string, tOpts ...text.WriteOption) (*text.Text, error) {
-	t, err := text.New(text.DisableScrolling())
-	if err != nil {
-		return nil, err
-	}
-
-	return t, t.Write(content, tOpts...)
 }
