@@ -4,7 +4,7 @@ import "github.com/samber/lo"
 
 type (
 	searchTabConfig struct {
-		Tab          searchTab
+		Name         searchTab
 		Label        string
 		Source       string
 		Status       string
@@ -39,35 +39,35 @@ const (
 func (a App) getSearchTabs() []searchTabConfig {
 	return []searchTabConfig{
 		{
-			Tab:          HOME_MANAGER_OPTIONS,
+			Name:         HOME_MANAGER_OPTIONS,
 			Label:        "Home manager options",
 			Source:       MEMORY_SOURCE,
 			Status:       WAITING,
 			WaitForEnter: false,
 		},
 		{
-			Tab:          NIX_PACKAGES,
+			Name:         NIX_PACKAGES,
 			Label:        "Nix packages",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
 			WaitForEnter: true,
 		},
 		{
-			Tab:          NIXOS_OPTIONS,
+			Name:         NIXOS_OPTIONS,
 			Label:        "NixOS options",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
 			WaitForEnter: true,
 		},
 		{
-			Tab:          FLAKES_PACKAGES,
+			Name:         FLAKES_PACKAGES,
 			Label:        "Flake packages",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
 			WaitForEnter: true,
 		},
 		{
-			Tab:          FLAKES_OPTIONS,
+			Name:         FLAKES_OPTIONS,
 			Label:        "Flake options",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
@@ -78,7 +78,7 @@ func (a App) getSearchTabs() []searchTabConfig {
 
 func (a App) getDefaultSearchTab() *searchTabConfig {
 	config, _ := lo.Find(a.getSearchTabs(), func(item searchTabConfig) bool {
-		return item.Tab == HOME_MANAGER_OPTIONS
+		return item.Name == HOME_MANAGER_OPTIONS
 	})
 
 	return &config
@@ -106,7 +106,7 @@ func (a *App) previousTab() {
 
 func (a App) getCurrentTabIndex() int {
 	_, index, found := lo.FindIndexOf(a.getSearchTabs(), func(searchTab searchTabConfig) bool {
-		return searchTab.Tab == a.currentSearchTab.Tab
+		return searchTab.Name == a.currentSearchTab.Name
 	})
 	if found {
 		return index

@@ -3,10 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"strings"
 
-	"github.com/luisnquin/nix-search/internal/nix"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/linestyle"
 	"github.com/mum4k/termdash/widgets/text"
@@ -79,23 +77,15 @@ func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
 		textinput.PlaceHolder("enter any text"),
 		textinput.FillColor(cell.ColorDefault),
 		textinput.ExclusiveKeyboardOnFocus(),
-		textinput.OnSubmit(func(text string) error {
-			options, err := a.nixClient.SearchHomeManagerOptions(ctx, text)
-			if err != nil {
-				uerr, ok := err.(*url.Error)
-				if ok && uerr.Timeout() {
-					return nil
-				}
-
-				return err // TODO: send to terminal screen and do not display context cancelled error
+		textinput.OnChange(func(input string) {
+			if a.currentSearchTab.WaitForEnter {
+				return
 			}
 
-			results := strings.Join(lo.Map(options, func(opt *nix.HomeManagerOption, _ int) string {
-				return opt.String()
-			}), " ")
-
-			a.resultsBoard.Reset()
-			a.resultsBoard.Write(results)
+			a.performSearch(ctx, input)
+		}),
+		textinput.OnSubmit(func(input string) error {
+			a.performSearch(ctx, input)
 
 			return nil
 		}))
