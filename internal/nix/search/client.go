@@ -38,8 +38,8 @@ const (
 	DEFAULT_SEARCH_QUERY_AGGREGATION_SIZE = 20
 )
 
-func NewClient(config *config.Config) Client {
-	return Client{
+func NewClient(config *config.Config) *Client {
+	return &Client{
 		config: config,
 		store: store{
 			homeManagerShell: homeManagerShell{

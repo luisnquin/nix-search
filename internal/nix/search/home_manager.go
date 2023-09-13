@@ -7,6 +7,7 @@ import (
 
 	"github.com/luisnquin/nix-search/internal/nix"
 	"github.com/samber/lo"
+	"mvdan.cc/xurls/v2"
 )
 
 type homeManagerOptionsData struct {
@@ -23,7 +24,7 @@ func (c *Client) SearchHomeManagerOptions(ctx context.Context, searchTerm string
 	searchTerm = strings.TrimSpace(searchTerm)
 
 	results := lo.Filter(options, func(option *nix.HomeManagerOption, _ int) bool {
-		return strings.HasPrefix(option.Type, searchTerm)
+		return strings.HasPrefix(option.Title, searchTerm)
 	})
 	if len(results) > 0 {
 		return results, nil
@@ -61,6 +62,14 @@ func (c Client) fetchHomeManagerOptions() (*homeManagerOptionsData, error) {
 
 	if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
 		return nil, err
+	}
+
+	rxStrict := xurls.Strict()
+	r := strings.NewReplacer("&lt;", "<", "&gt;", ">")
+
+	for i, option := range data.Options {
+		data.Options[i].Position = rxStrict.FindString(option.Position)
+		data.Options[i].Title = r.Replace(option.Title)
 	}
 
 	return &data, err
