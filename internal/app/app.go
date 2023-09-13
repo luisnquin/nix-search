@@ -146,5 +146,7 @@ func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
 }
 
 func (a App) getResultsBoard() (*text.Text, error) {
-	return text.New()
+	return text.New(
+		text.WrapAtWords(),
+	)
 }
