@@ -15,32 +15,32 @@ import (
 func (app *App) initWidgets() error {
 	var err error
 
-	app.elements.resultsBoard, err = app.getResultsBoard()
+	app.widgets.resultsBoard, err = app.getResultsBoard()
 	if err != nil {
 		return fmt.Errorf("results board: %w", err)
 	}
 
-	app.elements.searchInput, err = app.getSearchTextInput()
+	app.widgets.searchInput, err = app.getSearchTextInput()
 	if err != nil {
 		return fmt.Errorf("search input: %w", err)
 	}
 
-	app.elements.currentStatus, err = app.getCurrentStatusWidget()
+	app.widgets.currentStatus, err = app.getCurrentStatusWidget()
 	if err != nil {
 		return fmt.Errorf("current status widget: %w", err)
 	}
 
-	app.elements.currentLabel, err = app.getCurrentLabelWidget()
+	app.widgets.currentLabel, err = app.getCurrentLabelWidget()
 	if err != nil {
 		return fmt.Errorf("current label widget: %w", err)
 	}
 
-	app.elements.searchOptions, err = app.getSearchOptionsWidget()
+	app.widgets.searchOptions, err = app.getSearchOptionsWidget()
 	if err != nil {
 		return fmt.Errorf("search options widget: %w", err)
 	}
 
-	app.elements.currentSource, err = app.getCurrentSourceWidget()
+	app.widgets.currentSource, err = app.getCurrentSourceWidget()
 	if err != nil {
 		return fmt.Errorf("current source widget: %w", err)
 	}
@@ -49,14 +49,14 @@ func (app *App) initWidgets() error {
 }
 
 func (app App) updateWidgetTexts() error {
-	app.elements.resultsBoard.Reset()
+	app.widgets.resultsBoard.Reset()
 
-	err := app.elements.currentLabel.Write(app.currentSearchTab.Label, text.WriteReplace())
+	err := app.widgets.currentLabel.Write(app.currentSearchTab.Label, text.WriteReplace())
 	if err != nil {
 		return err
 	}
 
-	err = app.elements.currentSource.Write(app.currentSearchTab.Source, text.WriteReplace())
+	err = app.widgets.currentSource.Write(app.currentSearchTab.Source, text.WriteReplace())
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (app App) updateWidgetTexts() error {
 }
 
 func (app App) updateCurrentStatus(newStatus string) error {
-	return app.currentStatus.Write(newStatus, text.WriteReplace())
+	return app.widgets.currentStatus.Write(newStatus, text.WriteReplace())
 }
 
 func (a *App) getSearchTextInput() (*textinput.TextInput, error) {

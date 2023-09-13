@@ -13,12 +13,12 @@ import (
 func (app App) performSearch(ctx context.Context, input string) {
 	results, err := app.performSearchAndGetResults(ctx, input)
 	if err != nil { // TODO: handle error and send to widget
-		app.resultsBoard.Reset()
+		app.widgets.resultsBoard.Reset()
 
 		return
 	}
 
-	app.resultsBoard.Write(results, text.WriteReplace())
+	app.widgets.resultsBoard.Write(results, text.WriteReplace())
 }
 
 func (app App) performSearchAndGetResults(ctx context.Context, input string) (string, error) {

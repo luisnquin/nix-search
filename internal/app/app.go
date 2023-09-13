@@ -25,10 +25,10 @@ type (
 		nixClient *nix_search.Client
 
 		currentSearchTab *searchTabConfig
-		elements
+		widgets          widgets
 	}
 
-	elements struct {
+	widgets struct {
 		searchInput   *textinput.TextInput
 		resultsBoard  *text.Text
 		currentLabel  *text.Text
@@ -73,7 +73,7 @@ func (app App) run(ctx context.Context) error {
 		grid.RowHeightPerc(99,
 			grid.RowHeightFixed(5,
 				grid.Widget(
-					app.elements.searchInput,
+					app.widgets.searchInput,
 					container.Border(linestyle.Light),
 					container.AlignHorizontal(align.HorizontalCenter),
 					container.Focused(),
@@ -83,21 +83,21 @@ func (app App) run(ctx context.Context) error {
 			grid.RowHeightPerc(6,
 				grid.ColWidthPerc(30,
 					grid.Widget(
-						app.elements.currentLabel,
+						app.widgets.currentLabel,
 						container.BorderTitle("Current tab"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorMagenta),
 					)),
 				grid.ColWidthPerc(15,
 					grid.Widget(
-						app.elements.currentStatus,
+						app.widgets.currentStatus,
 						container.BorderTitle("Status"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorGreen),
 					)),
 				grid.ColWidthPerc(55,
 					grid.Widget(
-						app.elements.currentSource,
+						app.widgets.currentSource,
 						container.BorderTitle("Source"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorNavy),
@@ -105,7 +105,7 @@ func (app App) run(ctx context.Context) error {
 				)),
 			grid.RowHeightPerc(87,
 				grid.Widget(
-					app.elements.resultsBoard,
+					app.widgets.resultsBoard,
 					container.Border(linestyle.Light),
 					container.BorderTitle("Search results"),
 					container.BorderColor(cell.ColorAqua),
@@ -113,7 +113,7 @@ func (app App) run(ctx context.Context) error {
 			),
 			grid.RowHeightPerc(3,
 				grid.Widget(
-					app.elements.searchOptions,
+					app.widgets.searchOptions,
 					container.Border(linestyle.Light),
 					container.BorderTitle("Nix options"),
 					container.BorderColor(cell.ColorAqua),
