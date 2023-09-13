@@ -8,7 +8,6 @@ type (
 		Label        string
 		Source       string
 		Status       string
-		Prompt       string
 		WaitForEnter bool
 	}
 
@@ -37,11 +36,6 @@ const (
 	MEMORY_SOURCE         = "memory"
 )
 
-const (
-	SEARCH_PACKAGES_PROMPT = "Search packages: "
-	SEARCH_OPTIONS_PROMPT  = "Search options: "
-)
-
 func (a App) getSearchTabs() []searchTabConfig {
 	return []searchTabConfig{
 		{
@@ -49,7 +43,6 @@ func (a App) getSearchTabs() []searchTabConfig {
 			Label:        "Home manager options",
 			Source:       MEMORY_SOURCE,
 			Status:       WAITING,
-			Prompt:       SEARCH_OPTIONS_PROMPT,
 			WaitForEnter: false,
 		},
 		{
@@ -57,7 +50,6 @@ func (a App) getSearchTabs() []searchTabConfig {
 			Label:        "Nix packages",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
-			Prompt:       SEARCH_PACKAGES_PROMPT,
 			WaitForEnter: true,
 		},
 		{
@@ -65,7 +57,6 @@ func (a App) getSearchTabs() []searchTabConfig {
 			Label:        "NixOS options",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
-			Prompt:       SEARCH_OPTIONS_PROMPT,
 			WaitForEnter: true,
 		},
 		{
@@ -73,7 +64,6 @@ func (a App) getSearchTabs() []searchTabConfig {
 			Label:        "Flake packages",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
-			Prompt:       SEARCH_PACKAGES_PROMPT,
 			WaitForEnter: true,
 		},
 		{
@@ -81,7 +71,6 @@ func (a App) getSearchTabs() []searchTabConfig {
 			Label:        "Flake options",
 			Source:       ELASTIC_SEARCH_SOURCE,
 			Status:       WAITING,
-			Prompt:       SEARCH_OPTIONS_PROMPT,
 			WaitForEnter: true,
 		},
 	}

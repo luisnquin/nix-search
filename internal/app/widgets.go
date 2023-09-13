@@ -63,14 +63,18 @@ func (app App) updateWidgetTexts() error {
 		return err
 	}
 
-	return app.elements.currentStatus.Write(app.currentSearchTab.Status, text.WriteReplace())
+	return app.updateCurrentStatus(app.currentSearchTab.Status)
+}
+
+func (app App) updateCurrentStatus(newStatus string) error {
+	return app.currentStatus.Write(newStatus, text.WriteReplace())
 }
 
 func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
 	ctx := context.Background()
 
 	return textinput.New(
-		textinput.Label(a.currentSearchTab.Prompt, cell.FgColor(cell.ColorAqua)),
+		textinput.Label("Search packages/options: ", cell.FgColor(cell.ColorAqua)),
 		textinput.Border(linestyle.None),
 		textinput.PlaceHolder("enter any text"),
 		textinput.FillColor(cell.ColorDefault),
