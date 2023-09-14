@@ -69,7 +69,7 @@ func (c Client) SearchFlakeOptions(ctx context.Context, flakesBranchId, searchTe
 	}
 
 	sp := bluemonday.StrictPolicy()
-	nr := strings.NewReplacer("\n", " ")
+	replacer := strings.NewReplacer("\n", " ")
 
 	options := make([]*nix.FlakeOption, len(response.Hits.Items))
 
@@ -87,7 +87,7 @@ func (c Client) SearchFlakeOptions(ctx context.Context, flakesBranchId, searchTe
 			Revision: item.Source.Revision,
 			Option: &nix.Option{
 				Name:        item.Source.OptionName,
-				Description: nr.Replace(sp.Sanitize(item.Source.OptionDescription)),
+				Description: replacer.Replace(sp.Sanitize(item.Source.OptionDescription)),
 				Example:     item.Source.OptionExample,
 				Default:     item.Source.OptionDefault,
 				Source:      item.Source.OptionSource,

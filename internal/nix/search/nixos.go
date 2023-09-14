@@ -2,6 +2,7 @@ package nix_search
 
 import (
 	"context"
+	"strings"
 
 	"github.com/luisnquin/nix-search/internal/nix"
 	"github.com/microcosm-cc/bluemonday"
@@ -23,14 +24,15 @@ func (c Client) SearchNixOSOptions(ctx context.Context, channelBranch, searchTer
 		return nil, err
 	}
 
-	options := make([]*nix.Option, len(response.Hits.Items))
-
 	sp := bluemonday.StrictPolicy()
+	replacer := strings.NewReplacer("\n", " ")
+
+	options := make([]*nix.Option, len(response.Hits.Items))
 
 	for i, item := range response.Hits.Items {
 		options[i] = &nix.Option{
 			Name:        item.Source.Name,
-			Description: sp.Sanitize(item.Source.Description),
+			Description: replacer.Replace(sp.Sanitize(item.Source.Description)),
 			Example:     item.Source.Example,
 			Default:     item.Source.Default,
 			Source:      item.Source.Source,
