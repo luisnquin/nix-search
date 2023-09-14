@@ -2,8 +2,10 @@ package nix_search
 
 import (
 	"context"
+	"strings"
 
 	"github.com/luisnquin/nix-search/internal/nix"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type (
@@ -66,6 +68,9 @@ func (c Client) SearchFlakeOptions(ctx context.Context, searchTerm string, maxCo
 		return nil, err
 	}
 
+	sp := bluemonday.StrictPolicy()
+	nr := strings.NewReplacer("\n", " ")
+
 	options := make([]*nix.FlakeOption, len(response.Hits.Items))
 
 	for i, item := range response.Hits.Items {
@@ -82,7 +87,7 @@ func (c Client) SearchFlakeOptions(ctx context.Context, searchTerm string, maxCo
 			Revision: item.Source.Revision,
 			Option: &nix.Option{
 				Name:        item.Source.OptionName,
-				Description: item.Source.OptionDescription,
+				Description: nr.Replace(sp.Sanitize(item.Source.OptionDescription)),
 				Example:     item.Source.OptionExample,
 				Default:     item.Source.OptionDefault,
 				Source:      item.Source.OptionSource,
