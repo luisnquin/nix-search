@@ -62,8 +62,8 @@ type (
 	flakePackagesResponse = searchResponse[flakePackageResponseItem]
 )
 
-func (c Client) SearchFlakeOptions(ctx context.Context, searchTerm string, maxCount int) ([]*nix.FlakeOption, error) {
-	response, err := c.searchFlakeOptions(ctx, searchTerm, maxCount)
+func (c Client) SearchFlakeOptions(ctx context.Context, flakesBranchId, searchTerm string, maxCount int) ([]*nix.FlakeOption, error) {
+	response, err := c.searchFlakeOptions(ctx, flakesBranchId, searchTerm, maxCount)
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +98,8 @@ func (c Client) SearchFlakeOptions(ctx context.Context, searchTerm string, maxCo
 	return options, nil
 }
 
-func (c Client) SearchFlakePackages(ctx context.Context, searchTerm string, maxCount int) ([]*nix.FlakePackage, error) {
-	response, err := c.searchFlakePackages(ctx, searchTerm, maxCount)
+func (c Client) SearchFlakePackages(ctx context.Context, flakesBranchId, searchTerm string, maxCount int) ([]*nix.FlakePackage, error) {
+	response, err := c.searchFlakePackages(ctx, flakesBranchId, searchTerm, maxCount)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (c Client) SearchFlakePackages(ctx context.Context, searchTerm string, maxC
 	return packages, nil
 }
 
-func (c Client) searchFlakeOptions(ctx context.Context, searchTerm string, maxCount int) (flakeOptionsResponse, error) {
+func (c Client) searchFlakeOptions(ctx context.Context, flakesBranchId, searchTerm string, maxCount int) (flakeOptionsResponse, error) {
 	const query = // AQL
 	`
 	{
@@ -208,7 +208,7 @@ func (c Client) searchFlakeOptions(ctx context.Context, searchTerm string, maxCo
 		maxCount = MAX_RESULTS_COUNT
 	}
 
-	esClient, err := c.prepareElasticSearchClient(ES_FLAKES_ID)
+	esClient, err := c.prepareElasticSearchClient(flakesBranchId)
 	if err != nil {
 		return flakeOptionsResponse{}, err
 	}
@@ -232,7 +232,7 @@ func (c Client) searchFlakeOptions(ctx context.Context, searchTerm string, maxCo
 	return parseSearchResponse[flakeOptionResponseItem](response.Body)
 }
 
-func (c Client) searchFlakePackages(ctx context.Context, searchTerm string, maxCount int) (flakePackagesResponse, error) {
+func (c Client) searchFlakePackages(ctx context.Context, flakesBranchId, searchTerm string, maxCount int) (flakePackagesResponse, error) {
 	const query = // AQL
 	`
 	{
@@ -294,7 +294,7 @@ func (c Client) searchFlakePackages(ctx context.Context, searchTerm string, maxC
 	}
 	`
 
-	esClient, err := c.prepareElasticSearchClient(ES_FLAKES_ID)
+	esClient, err := c.prepareElasticSearchClient(flakesBranchId)
 	if err != nil {
 		return flakePackagesResponse{}, err
 	}

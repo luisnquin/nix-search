@@ -33,11 +33,12 @@ type (
 	}
 )
 
+// The ID for flakes(index fragment) in the ElasticSearch service.
+const ELASTIC_SEARCH_FLAKES_ID = "group-manual"
+
 const (
 	INDEX_PREFIX      = "latest"
 	MAX_RESULTS_COUNT = 10.000
-	// The ID for flakes(index fragment) in the ElasticSearch service.
-	ES_FLAKES_ID = "group-manual"
 )
 
 func parseSearchResponse[responseItem any](r io.Reader) (searchResponse[responseItem], error) {

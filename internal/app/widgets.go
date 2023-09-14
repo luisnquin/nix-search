@@ -3,13 +3,11 @@ package app
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/linestyle"
 	"github.com/mum4k/termdash/widgets/text"
 	"github.com/mum4k/termdash/widgets/textinput"
-	"github.com/samber/lo"
 )
 
 func (app *App) initWidgets() error {
@@ -35,14 +33,14 @@ func (app *App) initWidgets() error {
 		return fmt.Errorf("current label widget: %w", err)
 	}
 
-	app.widgets.searchOptions, err = app.getSearchOptionsWidget()
-	if err != nil {
-		return fmt.Errorf("search options widget: %w", err)
-	}
-
 	app.widgets.currentSource, err = app.getCurrentSourceWidget()
 	if err != nil {
 		return fmt.Errorf("current source widget: %w", err)
+	}
+
+	app.widgets.currentChannelId, err = app.getCurrentChannelWidget()
+	if err != nil {
+		return fmt.Errorf("current channel id widget: %w", err)
 	}
 
 	return nil
@@ -61,7 +59,22 @@ func (app *App) updateWidgetTexts() error {
 		return err
 	}
 
+	if err := app.updateCurrentChannelID(); err != nil {
+		return err
+	}
+
 	return app.updateCurrentStatus(app.tabs.search.Status)
+}
+
+func (app *App) updateCurrentChannelID() error {
+	channelId := app.tabs.search.CurrentChannelID
+	if channelId == "" {
+		channelId = "No channel"
+	}
+
+	app.widgets.currentChannelId.Reset()
+
+	return app.widgets.currentChannelId.Write(channelId)
 }
 
 func (app *App) updateCurrentStatus(newStatus string) error {
@@ -109,12 +122,8 @@ func (app App) getCurrentSourceWidget() (*text.Text, error) {
 	return app.newTextWidget(app.tabs.search.Source, text.WriteCellOpts(cell.Bold()))
 }
 
-func (a *App) getSearchOptionsWidget() (*text.Text, error) {
-	tabs := lo.Map(a.getSearchTabs(), func(tab searchTabConfig, _ int) string {
-		return tab.Label
-	})
-
-	return a.newTextWidget(strings.Join(tabs, " | "))
+func (app App) getCurrentChannelWidget() (*text.Text, error) {
+	return app.newTextWidget(app.tabs.search.CurrentChannelID, text.WriteCellOpts(cell.Bold()))
 }
 
 func (a *App) newTextWidget(content string, tOpts ...text.WriteOption) (*text.Text, error) {

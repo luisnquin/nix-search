@@ -34,12 +34,12 @@ type (
 	}
 
 	widgets struct {
-		searchInput   *textinput.TextInput
-		resultsBoard  *text.Text
-		currentLabel  *text.Text
-		currentStatus *text.Text
-		currentSource *text.Text
-		searchOptions *text.Text
+		searchInput      *textinput.TextInput
+		resultsBoard     *text.Text
+		currentChannelId *text.Text
+		currentStatus    *text.Text
+		currentSource    *text.Text
+		currentLabel     *text.Text
 	}
 )
 
@@ -89,41 +89,40 @@ func (app App) run(ctx context.Context) error {
 				),
 			),
 			grid.RowHeightPerc(6,
-				grid.ColWidthPerc(30,
+				grid.ColWidthPerc(25,
 					grid.Widget(
 						app.widgets.currentLabel,
 						container.BorderTitle("Current tab"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorMagenta),
 					)),
-				grid.ColWidthPerc(15,
+				grid.ColWidthPerc(20,
+					grid.Widget(
+						app.widgets.currentChannelId,
+						container.BorderTitle("Channel ID"),
+						container.Border(linestyle.Light),
+						container.BorderColor(cell.ColorNavy),
+					)),
+				grid.ColWidthPerc(20,
 					grid.Widget(
 						app.widgets.currentStatus,
 						container.BorderTitle("Status"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorGreen),
 					)),
-				grid.ColWidthPerc(55,
+				grid.ColWidthPerc(35,
 					grid.Widget(
 						app.widgets.currentSource,
 						container.BorderTitle("Source"),
 						container.Border(linestyle.Light),
-						container.BorderColor(cell.ColorNavy),
-					),
-				)),
-			grid.RowHeightPerc(87,
+						container.BorderColor(cell.ColorFuchsia),
+					)),
+			),
+			grid.RowHeightPerc(90,
 				grid.Widget(
 					app.widgets.resultsBoard,
 					container.Border(linestyle.Light),
 					container.BorderTitle("Search results"),
-					container.BorderColor(cell.ColorAqua),
-				),
-			),
-			grid.RowHeightPerc(3,
-				grid.Widget(
-					app.widgets.searchOptions,
-					container.Border(linestyle.Light),
-					container.BorderTitle("Nix options"),
 					container.BorderColor(cell.ColorAqua),
 				),
 			),
@@ -147,11 +146,12 @@ func (app App) run(ctx context.Context) error {
 				cancel()
 			case k.Key == keyboard.KeyCtrlLsqBracket:
 				app.previousTab()
-				app.updateWidgetTexts()
 
 			case k.Key == keyboard.KeyCtrlRsqBracket:
 				app.nextTab()
-				app.updateWidgetTexts()
+
+			case k.Key == keyboard.KeyCtrlSpace:
+				app.nextChannel()
 			}
 		}),
 		termdash.RedrawInterval(350 * time.Millisecond),

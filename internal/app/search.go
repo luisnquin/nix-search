@@ -11,6 +11,15 @@ import (
 	"github.com/samber/lo"
 )
 
+// Search states.
+const (
+	SEARCHING = "searching"
+	FETCHING  = "fetching"
+	WAITING   = "waiting"
+)
+
+var ErrChannelNotFound = fmt.Errorf("channel not found")
+
 func (app *App) performSearch(ctx context.Context, input string) {
 	app.updateCurrentStatus(SEARCHING)
 
@@ -64,11 +73,9 @@ func (app App) searchHomeManagerOptions(ctx context.Context, input string) (stri
 }
 
 func (app App) searchNixOSOptions(ctx context.Context, input string) (string, error) {
-	channelStatus := nix.CHANNEL_STATUS_ROLLING
-
-	channel, found := app.config.Internal.Nix.FindChannelWithStatus(channelStatus)
+	channel, found := app.config.Internal.Nix.FindChannel(app.tabs.search.CurrentChannelID)
 	if !found {
-		panic(fmt.Sprintf("unable to find channel with %s status", channelStatus))
+		return "", ErrChannelNotFound
 	}
 
 	options, err := app.nixClient.SearchNixOSOptions(ctx, channel.Branch, input, 100)
@@ -85,11 +92,9 @@ func (app App) searchNixOSOptions(ctx context.Context, input string) (string, er
 }
 
 func (app App) searchNixPackages(ctx context.Context, input string) (string, error) {
-	channelStatus := nix.CHANNEL_STATUS_ROLLING
-
-	channel, found := app.config.Internal.Nix.FindChannelWithStatus(channelStatus)
+	channel, found := app.config.Internal.Nix.FindChannel(app.tabs.search.CurrentChannelID)
 	if !found {
-		panic(fmt.Sprintf("unable to find channel with %s status", channelStatus))
+		return "", ErrChannelNotFound
 	}
 
 	packages, err := app.nixClient.SearchPackages(ctx, channel.Branch, input, 100)
@@ -106,7 +111,7 @@ func (app App) searchNixPackages(ctx context.Context, input string) (string, err
 }
 
 func (app App) searchNixFlakePackages(ctx context.Context, input string) (string, error) {
-	packages, err := app.nixClient.SearchFlakePackages(ctx, input, 100)
+	packages, err := app.nixClient.SearchFlakePackages(ctx, app.tabs.search.CurrentChannelID, input, 100)
 	if err != nil {
 		return "", err
 	}
@@ -120,7 +125,7 @@ func (app App) searchNixFlakePackages(ctx context.Context, input string) (string
 }
 
 func (app App) searchNixFlakeOptions(ctx context.Context, input string) (string, error) {
-	options, err := app.nixClient.SearchFlakeOptions(ctx, input, 100)
+	options, err := app.nixClient.SearchFlakeOptions(ctx, app.tabs.search.CurrentChannelID, input, 100)
 	if err != nil {
 		return "", err
 	}

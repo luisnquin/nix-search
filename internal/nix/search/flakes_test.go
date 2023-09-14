@@ -13,7 +13,7 @@ func TestFlakeOptionsSmoke(t *testing.T) {
 
 	client := nix_search.NewClient(appConfig)
 
-	options, err := client.SearchFlakeOptions(ctx, "wayland", 50)
+	options, err := client.SearchFlakeOptions(ctx, nix_search.ELASTIC_SEARCH_FLAKES_ID, "wayland", 50)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +28,7 @@ func TestFlakePackagesSmoke(t *testing.T) {
 
 	client := nix_search.NewClient(appConfig)
 
-	options, err := client.SearchFlakePackages(ctx, "wayland", 50)
+	options, err := client.SearchFlakePackages(ctx, nix_search.ELASTIC_SEARCH_FLAKES_ID, "wayland", 50)
 	if err != nil {
 		t.Fatal(err)
 	}
