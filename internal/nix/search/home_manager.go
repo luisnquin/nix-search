@@ -35,6 +35,10 @@ func (c *Client) SearchHomeManagerOptions(ctx context.Context, searchTerm string
 	}), nil
 }
 
+func (c *Client) HomeManagerOptionsAlreadyFetched() bool {
+	return c.store.homeManagerShell.data != nil
+}
+
 func (c *Client) getHomeManagerOptions(ctx context.Context) ([]*nix.HomeManagerOption, error) {
 	var err error
 

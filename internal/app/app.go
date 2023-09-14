@@ -152,6 +152,9 @@ func (app App) run(ctx context.Context) error {
 
 			case k.Key == keyboard.KeyCtrlSpace:
 				app.nextChannel()
+
+			case k.Key == keyboard.KeyCtrlQ:
+				app.clearSearchInput()
 			}
 		}),
 		termdash.RedrawInterval(350 * time.Millisecond),

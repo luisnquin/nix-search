@@ -10,7 +10,6 @@ type searchTabConfig struct {
 	Name             searchTab
 	Label            string
 	Source           string
-	Status           string
 	WaitForEnter     bool
 	ChannelIDs       []string
 	CurrentChannelID string
@@ -43,17 +42,14 @@ func (app *App) getSearchTabs() []searchTabConfig {
 			Name:             NIX_PACKAGES,
 			Label:            "Nix packages",
 			Source:           ELASTIC_SEARCH_SOURCE,
-			Status:           WAITING,
 			WaitForEnter:     true,
 			ChannelIDs:       channelIds,
 			CurrentChannelID: app.config.Internal.Nix.DefaultChannel,
 		},
 		{
-			Name:  HOME_MANAGER_OPTIONS,
-			Label: "Home manager options",
-
+			Name:         HOME_MANAGER_OPTIONS,
+			Label:        "Home manager options",
 			Source:       MEMORY_SOURCE,
-			Status:       WAITING,
 			WaitForEnter: false,
 			ChannelIDs:   nil,
 		},
@@ -61,7 +57,6 @@ func (app *App) getSearchTabs() []searchTabConfig {
 			Name:             NIXOS_OPTIONS,
 			Label:            "NixOS options",
 			Source:           ELASTIC_SEARCH_SOURCE,
-			Status:           WAITING,
 			WaitForEnter:     true,
 			ChannelIDs:       channelIds,
 			CurrentChannelID: app.config.Internal.Nix.DefaultChannel,
@@ -70,7 +65,6 @@ func (app *App) getSearchTabs() []searchTabConfig {
 			Name:             FLAKES_PACKAGES,
 			Label:            "Flake packages",
 			Source:           ELASTIC_SEARCH_SOURCE,
-			Status:           WAITING,
 			WaitForEnter:     true,
 			ChannelIDs:       []string{nix_search.ELASTIC_SEARCH_FLAKES_ID},
 			CurrentChannelID: nix_search.ELASTIC_SEARCH_FLAKES_ID,
@@ -79,7 +73,6 @@ func (app *App) getSearchTabs() []searchTabConfig {
 			Name:             FLAKES_OPTIONS,
 			Label:            "Flake options",
 			Source:           ELASTIC_SEARCH_SOURCE,
-			Status:           WAITING,
 			WaitForEnter:     true,
 			ChannelIDs:       []string{nix_search.ELASTIC_SEARCH_FLAKES_ID},
 			CurrentChannelID: nix_search.ELASTIC_SEARCH_FLAKES_ID,

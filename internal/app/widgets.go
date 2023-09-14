@@ -59,11 +59,9 @@ func (app *App) updateWidgetTexts() error {
 		return err
 	}
 
-	if err := app.updateCurrentChannelID(); err != nil {
-		return err
-	}
+	return app.updateCurrentChannelID()
 
-	return app.updateCurrentStatus(app.tabs.search.Status)
+	// return app.updateCurrentStatus(app.tabs.search.Status)
 }
 
 func (app *App) updateCurrentChannelID() error {
@@ -81,6 +79,10 @@ func (app *App) updateCurrentStatus(newStatus string) error {
 	return app.widgets.currentStatus.Write(newStatus, text.WriteReplace())
 }
 
+func (app App) clearSearchInput() {
+	_ = app.widgets.searchInput.ReadAndClear()
+}
+
 func (app *App) getSearchTextInput() (*textinput.TextInput, error) {
 	return textinput.New(
 		textinput.Label("Search packages/options: ", cell.FgColor(cell.ColorAqua)),
@@ -94,6 +96,10 @@ func (app *App) getSearchTextInput() (*textinput.TextInput, error) {
 
 func (app *App) handleSearchInputChange(input string) {
 	if app.tabs.search.WaitForEnter {
+		return
+	}
+
+	if app.tabs.search.Name == HOME_MANAGER_OPTIONS && !app.nixClient.HomeManagerOptionsAlreadyFetched() {
 		return
 	}
 
@@ -115,7 +121,7 @@ func (app App) getCurrentLabelWidget() (*text.Text, error) {
 }
 
 func (app App) getCurrentStatusWidget() (*text.Text, error) {
-	return app.newTextWidget(app.tabs.search.Status, text.WriteCellOpts(cell.Bold()))
+	return app.newTextWidget(WAITING, text.WriteCellOpts(cell.Bold()))
 }
 
 func (app App) getCurrentSourceWidget() (*text.Text, error) {
