@@ -23,9 +23,14 @@ import (
 type (
 	App struct {
 		nixClient *nix_search.Client
+		config    *config.Config
 
-		currentSearchTab *searchTabConfig
-		widgets          widgets
+		widgets widgets
+		tabs    *tabs
+	}
+
+	tabs struct {
+		search *searchTabConfig
 	}
 
 	widgets struct {
@@ -41,9 +46,12 @@ type (
 func New(config *config.Config) (App, error) {
 	app := App{
 		nixClient: nix_search.NewClient(config),
+		config:    config,
 	}
 
-	app.currentSearchTab = app.getDefaultSearchTab()
+	app.tabs = &tabs{
+		search: app.getDefaultSearchTab(),
+	}
 
 	if err := app.initWidgets(); err != nil {
 		return App{}, err
@@ -146,7 +154,7 @@ func (app App) run(ctx context.Context) error {
 				app.updateWidgetTexts()
 			}
 		}),
-		termdash.RedrawInterval(500 * time.Millisecond),
+		termdash.RedrawInterval(350 * time.Millisecond),
 	}
 
 	return termdash.Run(ctx, t, c, termOptions...)

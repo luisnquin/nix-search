@@ -48,66 +48,68 @@ func (app *App) initWidgets() error {
 	return nil
 }
 
-func (app App) updateWidgetTexts() error {
+func (app *App) updateWidgetTexts() error {
 	app.widgets.resultsBoard.Reset()
 
-	err := app.widgets.currentLabel.Write(app.currentSearchTab.Label, text.WriteReplace())
+	err := app.widgets.currentLabel.Write(app.tabs.search.Label, text.WriteReplace())
 	if err != nil {
 		return err
 	}
 
-	err = app.widgets.currentSource.Write(app.currentSearchTab.Source, text.WriteReplace())
+	err = app.widgets.currentSource.Write(app.tabs.search.Source, text.WriteReplace())
 	if err != nil {
 		return err
 	}
 
-	return app.updateCurrentStatus(app.currentSearchTab.Status)
+	return app.updateCurrentStatus(app.tabs.search.Status)
 }
 
-func (app App) updateCurrentStatus(newStatus string) error {
+func (app *App) updateCurrentStatus(newStatus string) error {
 	return app.widgets.currentStatus.Write(newStatus, text.WriteReplace())
 }
 
-func (a *App) getSearchTextInput() (*textinput.TextInput, error) {
-	ctx := context.Background()
-
+func (app *App) getSearchTextInput() (*textinput.TextInput, error) {
 	return textinput.New(
 		textinput.Label("Search packages/options: ", cell.FgColor(cell.ColorAqua)),
 		textinput.Border(linestyle.None),
 		textinput.PlaceHolder("enter any text"),
 		textinput.FillColor(cell.ColorDefault),
 		textinput.ExclusiveKeyboardOnFocus(),
-		textinput.OnChange(func(input string) {
-			if a.currentSearchTab.WaitForEnter {
-				return
-			}
+		textinput.OnChange(app.handleSearchInputChange),
+		textinput.OnSubmit(app.handleSearchInputSubmit))
+}
 
-			a.performSearch(ctx, input)
-		}),
-		textinput.OnSubmit(func(input string) error {
-			a.performSearch(ctx, input)
+func (app *App) handleSearchInputChange(input string) {
+	if app.tabs.search.WaitForEnter {
+		return
+	}
 
-			return nil
-		}))
+	app.performSearch(context.Background(), input)
+}
+
+func (app *App) handleSearchInputSubmit(input string) error {
+	app.performSearch(context.Background(), input)
+
+	return nil
 }
 
 func (a App) getResultsBoard() (*text.Text, error) {
 	return text.New(text.WrapAtWords())
 }
 
-func (a App) getCurrentLabelWidget() (*text.Text, error) {
-	return a.newTextWidget(a.currentSearchTab.Label)
+func (app App) getCurrentLabelWidget() (*text.Text, error) {
+	return app.newTextWidget(app.tabs.search.Label)
 }
 
-func (a App) getCurrentStatusWidget() (*text.Text, error) {
-	return a.newTextWidget(a.currentSearchTab.Status, text.WriteCellOpts(cell.Bold()))
+func (app App) getCurrentStatusWidget() (*text.Text, error) {
+	return app.newTextWidget(app.tabs.search.Status, text.WriteCellOpts(cell.Bold()))
 }
 
-func (a App) getCurrentSourceWidget() (*text.Text, error) {
-	return a.newTextWidget(a.currentSearchTab.Source, text.WriteCellOpts(cell.Bold()))
+func (app App) getCurrentSourceWidget() (*text.Text, error) {
+	return app.newTextWidget(app.tabs.search.Source, text.WriteCellOpts(cell.Bold()))
 }
 
-func (a App) getSearchOptionsWidget() (*text.Text, error) {
+func (a *App) getSearchOptionsWidget() (*text.Text, error) {
 	tabs := lo.Map(a.getSearchTabs(), func(tab searchTabConfig, _ int) string {
 		return tab.Label
 	})
@@ -115,7 +117,7 @@ func (a App) getSearchOptionsWidget() (*text.Text, error) {
 	return a.newTextWidget(strings.Join(tabs, " | "))
 }
 
-func (a App) newTextWidget(content string, tOpts ...text.WriteOption) (*text.Text, error) {
+func (a *App) newTextWidget(content string, tOpts ...text.WriteOption) (*text.Text, error) {
 	t, err := text.New(text.DisableScrolling())
 	if err != nil {
 		return nil, err
