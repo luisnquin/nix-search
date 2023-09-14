@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/luisnquin/nix-search/internal/nix"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type nixosOptionResponseItem struct {
@@ -24,10 +25,12 @@ func (c Client) SearchNixOSOptions(ctx context.Context, channelBranch, searchTer
 
 	options := make([]*nix.Option, len(response.Hits.Items))
 
+	sp := bluemonday.StrictPolicy()
+
 	for i, item := range response.Hits.Items {
 		options[i] = &nix.Option{
 			Name:        item.Source.Name,
-			Description: item.Source.Description,
+			Description: sp.Sanitize(item.Source.Description),
 			Example:     item.Source.Example,
 			Default:     item.Source.Default,
 			Source:      item.Source.Source,
