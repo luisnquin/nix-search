@@ -33,6 +33,12 @@ func (app *App) performSearchAndGetResults(ctx context.Context, input string) (s
 		return app.searchHomeManagerOptions(ctx, input)
 	case NIX_PACKAGES:
 		return app.searchNixPackages(ctx, input)
+	case NIXOS_OPTIONS:
+		return app.searchNixOSOptions(ctx, input)
+	case FLAKES_OPTIONS:
+		return app.searchNixFlakeOptions(ctx, input)
+	case FLAKES_PACKAGES:
+		return app.searchNixFlakePackages(ctx, input)
 	}
 
 	return "", nil
@@ -71,7 +77,8 @@ func (app App) searchNixOSOptions(ctx context.Context, input string) (string, er
 	}
 
 	prettyOptions := lo.Map(options, func(option *nix.Option, _ int) string {
-		return fmt.Sprintf("%s - %s\nType: %s\nDefault: %s\n", option.Name, option.Description, *option.Example, option.Default)
+		return fmt.Sprintf("%s - %s\nExample: %v\nDefault: %s\n",
+			option.Name, option.Description, lo.FromPtrOr(option.Example, "null"), option.Default)
 	})
 
 	return strings.Join(prettyOptions, "\n\n"), nil
@@ -92,10 +99,38 @@ func (app App) searchNixPackages(ctx context.Context, input string) (string, err
 
 	prettyPkgs := lo.Map(packages, func(pkg *nix.Package, _ int) string {
 		return fmt.Sprintf("%s (%s) - %s\nPrograms: %v\nOutputs: %v\n%s\n", pkg.Name, pkg.Version,
-			pkg.Description, pkg.Outputs, pkg.Programs, app.findSource(channel, *pkg.RepositoryPosition))
+			pkg.Description, pkg.Programs, pkg.Outputs, app.findSource(channel, *pkg.RepositoryPosition))
 	})
 
 	return strings.Join(prettyPkgs, "\n\n"), nil
+}
+
+func (app App) searchNixFlakePackages(ctx context.Context, input string) (string, error) {
+	packages, err := app.nixClient.SearchFlakePackages(ctx, input, 100)
+	if err != nil {
+		return "", err
+	}
+
+	prettyPkgs := lo.Map(packages, func(pkg *nix.FlakePackage, _ int) string {
+		return fmt.Sprintf("%s (%s) - %s\nFlake: %s\nPrograms: %v\nOutputs: %v\n",
+			pkg.Name, pkg.Version, pkg.Description, pkg.Flake.Name, pkg.Programs, pkg.Outputs)
+	})
+
+	return strings.Join(prettyPkgs, "\n\n"), nil
+}
+
+func (app App) searchNixFlakeOptions(ctx context.Context, input string) (string, error) {
+	options, err := app.nixClient.SearchFlakeOptions(ctx, input, 100)
+	if err != nil {
+		return "", err
+	}
+
+	prettyOptions := lo.Map(options, func(option *nix.FlakeOption, _ int) string {
+		return fmt.Sprintf("%s - %s\nFlake: %s\nExample: %v\nDefault: %s\n",
+			option.Name, option.Description, option.Flake.Name, lo.FromPtrOr(option.Example, "null"), option.Default)
+	})
+
+	return strings.Join(prettyOptions, "\n\n"), nil
 }
 
 func (app App) findSource(channel config.NixChannel, source string) string {

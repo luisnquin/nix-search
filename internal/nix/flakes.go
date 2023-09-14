@@ -6,13 +6,13 @@ type (
 	FlakePackage struct {
 		Flake    *FlakeMetadata `json:"flake"`
 		Revision string         `json:"revision"`
-		Package  *Package       `json:"package"`
+		*Package `json:"package"`
 	}
 
 	FlakeOption struct {
 		Flake    *FlakeMetadata `json:"flake"`
 		Revision string         `json:"revision"`
-		Option   *Option        `json:"option"`
+		*Option  `json:"option"`
 	}
 
 	FlakeMetadata struct {
