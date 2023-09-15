@@ -84,7 +84,7 @@ func (app App) searchHomeManagerOptions(ctx context.Context, input string, chSta
 	chStatus <- MAPPING
 
 	prettyOptions := lo.Map(options, func(opt *nix.HomeManagerOption, _ int) string {
-		return fmt.Sprintf("%s - %s\n %s\n Example: %s\n Default: %s\n",
+		return fmt.Sprintf("%s - %s\n%s\nExample: %s\nDefault: %s\n",
 			opt.Title, opt.Description, opt.Position, opt.Example, opt.Default)
 	})
 
