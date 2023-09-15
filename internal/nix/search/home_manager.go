@@ -16,23 +16,27 @@ type homeManagerOptionsData struct {
 }
 
 func (c *Client) SearchHomeManagerOptions(ctx context.Context, searchTerm string) ([]*nix.HomeManagerOption, error) {
+	searchTerm = strings.TrimSpace(searchTerm)
+
 	options, err := c.getHomeManagerOptions(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	searchTerm = strings.TrimSpace(searchTerm)
-
-	results := lo.Filter(options, func(option *nix.HomeManagerOption, _ int) bool {
-		return strings.HasPrefix(option.Title, searchTerm)
-	})
-	if len(results) > 0 {
-		return results, nil
+	matchFns := []func(s string, otherS string) bool{
+		strings.HasPrefix, strings.Contains, strings.HasSuffix,
 	}
 
-	return lo.Filter(options, func(option *nix.HomeManagerOption, _ int) bool {
-		return strings.Contains(option.Type, searchTerm)
-	}), nil
+	for _, matchFn := range matchFns {
+		results := lo.Filter(options, func(option *nix.HomeManagerOption, _ int) bool {
+			return matchFn(option.Title, searchTerm)
+		})
+		if len(results) > 0 {
+			return results, nil
+		}
+	}
+
+	return nil, nil
 }
 
 func (c *Client) HomeManagerOptionsAlreadyFetched() bool {
