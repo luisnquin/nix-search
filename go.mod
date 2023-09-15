@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/elastic/go-elasticsearch/v7 v7.10.0
+	github.com/luisnquin/flaggy v0.1.2
 	github.com/microcosm-cc/bluemonday v1.0.25
 	github.com/mum4k/termdash v0.18.0
 	github.com/samber/lo v1.38.1
