@@ -34,7 +34,9 @@ func (app App) getCurrentBranchIndex() int {
 func (app *App) nextChannel() {
 	index := app.getCurrentBranchIndex()
 
-	if index+1 == len(app.tabs.search.ChannelIDs) {
+	if len(app.tabs.search.ChannelIDs) == 0 {
+		return
+	} else if index+1 == len(app.tabs.search.ChannelIDs) {
 		index = 0
 	} else {
 		index++
