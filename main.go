@@ -4,20 +4,20 @@ import (
 	"context"
 	"log"
 
-	"github.com/luisnquin/nix-search/internal/app"
 	"github.com/luisnquin/nix-search/internal/config"
+	"github.com/luisnquin/nix-search/internal/gui"
 )
 
 func main() {
 	ctx := context.Background()
 	appConfig := config.Load()
 
-	app, err := app.New(appConfig)
-	if err != nil {
+	gui, err := gui.New(appConfig)
+	if err !=: nil {
 		log.Fatal(err)
 	}
 
-	if err := app.Run(ctx); err != nil {
+	if err := gui.Run(ctx); err != nil {
 		log.Fatal(err)
 	}
 }

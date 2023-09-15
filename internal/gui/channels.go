@@ -1,4 +1,4 @@
-package app
+package gui
 
 import "github.com/samber/lo"
 
