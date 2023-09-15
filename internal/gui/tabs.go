@@ -32,8 +32,8 @@ const (
 	MEMORY_SOURCE         = "External file(in-memory)"
 )
 
-func (app *App) getSearchTabs() []searchTabConfig {
-	channelIds := lo.Map(app.config.Internal.Nix.Channels, func(config config.NixChannel, _ int) string {
+func (g *GUI) getSearchTabs() []searchTabConfig {
+	channelIds := lo.Map(g.config.Internal.Nix.Channels, func(config config.NixChannel, _ int) string {
 		return config.ID
 	})
 
@@ -44,7 +44,7 @@ func (app *App) getSearchTabs() []searchTabConfig {
 			Source:           ELASTIC_SEARCH_SOURCE,
 			WaitForEnter:     true,
 			ChannelIDs:       channelIds,
-			CurrentChannelID: app.config.Internal.Nix.DefaultChannel,
+			CurrentChannelID: g.config.Internal.Nix.DefaultChannel,
 		},
 		{
 			Name:         HOME_MANAGER_OPTIONS,
@@ -59,7 +59,7 @@ func (app *App) getSearchTabs() []searchTabConfig {
 			Source:           ELASTIC_SEARCH_SOURCE,
 			WaitForEnter:     true,
 			ChannelIDs:       channelIds,
-			CurrentChannelID: app.config.Internal.Nix.DefaultChannel,
+			CurrentChannelID: g.config.Internal.Nix.DefaultChannel,
 		},
 		{
 			Name:             FLAKES_PACKAGES,
@@ -80,17 +80,17 @@ func (app *App) getSearchTabs() []searchTabConfig {
 	}
 }
 
-func (a App) getDefaultSearchTab() *searchTabConfig {
-	config, _ := lo.Find(a.getSearchTabs(), func(item searchTabConfig) bool {
+func (g GUI) getDefaultSearchTab() *searchTabConfig {
+	config, _ := lo.Find(g.getSearchTabs(), func(item searchTabConfig) bool {
 		return item.Name == NIX_PACKAGES
 	})
 
 	return &config
 }
 
-func (app App) getCurrentTabIndex() int {
-	_, index, found := lo.FindIndexOf(app.getSearchTabs(), func(searchTab searchTabConfig) bool {
-		return searchTab.Name == app.tabs.search.Name
+func (g GUI) getCurrentTabIndex() int {
+	_, index, found := lo.FindIndexOf(g.getSearchTabs(), func(searchTab searchTabConfig) bool {
+		return searchTab.Name == g.tabs.search.Name
 	})
 	if found {
 		return index
@@ -99,22 +99,22 @@ func (app App) getCurrentTabIndex() int {
 	return 0
 }
 
-func (app *App) nextTab() {
-	searchTabs := app.getSearchTabs()
-	index := app.getCurrentTabIndex()
+func (g *GUI) nextTab() {
+	searchTabs := g.getSearchTabs()
+	index := g.getCurrentTabIndex()
 
 	if index+1 < len(searchTabs) {
-		app.tabs.search = &searchTabs[index+1]
-		app.updateWidgetTexts()
+		g.tabs.search = &searchTabs[index+1]
+		g.updateWidgetTexts()
 	}
 }
 
-func (app *App) previousTab() {
-	searchTabs := app.getSearchTabs()
-	index := app.getCurrentTabIndex()
+func (g *GUI) previousTab() {
+	searchTabs := g.getSearchTabs()
+	index := g.getCurrentTabIndex()
 
 	if index-1 >= 0 {
-		app.tabs.search = &searchTabs[index-1]
-		app.updateWidgetTexts()
+		g.tabs.search = &searchTabs[index-1]
+		g.updateWidgetTexts()
 	}
 }

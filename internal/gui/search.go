@@ -21,57 +21,57 @@ const (
 
 var ErrChannelNotFound = fmt.Errorf("channel not found")
 
-func (app *App) performSearch(ctx context.Context, input string) {
-	app.updateCurrentStatus(SEARCHING)
+func (g *GUI) performSearch(ctx context.Context, input string) {
+	g.updateCurrentStatus(SEARCHING)
 
-	results, err := app.performSearchAndGetResults(ctx, input)
+	results, err := g.performSearchAndGetResults(ctx, input)
 	if err != nil { // TODO: handle error and send to widget
-		app.widgets.resultsBoard.Reset()
+		g.widgets.resultsBoard.Reset()
 
 		return
 	}
 
-	app.updateCurrentStatus(WAITING)
+	g.updateCurrentStatus(WAITING)
 
-	app.widgets.resultsBoard.Reset()
-	app.widgets.resultsBoard.Write(results)
+	g.widgets.resultsBoard.Reset()
+	g.widgets.resultsBoard.Write(results)
 }
 
-func (app *App) performSearchAndGetResults(ctx context.Context, input string) (string, error) {
-	chSearchStatus := make(chan string)
+func (g *GUI) performSearchAndGetResults(ctx context.Context, input string) (string, error) {
+	statusChan := make(chan string)
 
 	go func() {
-		for status := range chSearchStatus {
-			app.updateCurrentStatus(status)
+		for status := range statusChan {
+			g.updateCurrentStatus(status)
 		}
 	}()
 
-	switch app.tabs.search.Name {
+	switch g.tabs.search.Name {
 	case HOME_MANAGER_OPTIONS:
-		return app.searchHomeManagerOptions(ctx, input, chSearchStatus)
+		return g.searchHomeManagerOptions(ctx, input, statusChan)
 	case NIX_PACKAGES:
-		return app.searchNixPackages(ctx, input, chSearchStatus)
+		return g.searchNixPackages(ctx, input, statusChan)
 	case NIXOS_OPTIONS:
-		return app.searchNixOSOptions(ctx, input, chSearchStatus)
+		return g.searchNixOSOptions(ctx, input, statusChan)
 	case FLAKES_OPTIONS:
-		return app.searchNixFlakeOptions(ctx, input, chSearchStatus)
+		return g.searchNixFlakeOptions(ctx, input, statusChan)
 	case FLAKES_PACKAGES:
-		return app.searchNixFlakePackages(ctx, input, chSearchStatus)
+		return g.searchNixFlakePackages(ctx, input, statusChan)
 	}
 
 	return "", nil
 }
 
-func (app App) searchHomeManagerOptions(ctx context.Context, input string, chStatus chan string) (string, error) {
-	defer close(chStatus)
+func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
+	defer close(statusChan)
 
-	if app.nixClient.HomeManagerOptionsAlreadyFetched() {
-		chStatus <- SEARCHING
+	if g.nixClient.HomeManagerOptionsAlreadyFetched() {
+		statusChan <- SEARCHING
 	} else {
-		chStatus <- FETCHING
+		statusChan <- FETCHING
 	}
 
-	options, err := app.nixClient.SearchHomeManagerOptions(ctx, input)
+	options, err := g.nixClient.SearchHomeManagerOptions(ctx, input)
 	if err != nil {
 		uerr, ok := err.(*url.Error)
 		if ok && uerr.Timeout() {
@@ -81,34 +81,34 @@ func (app App) searchHomeManagerOptions(ctx context.Context, input string, chSta
 		return "", err // TODO: send to terminal screen and do not display context cancelled error
 	}
 
-	chStatus <- MAPPING
+	statusChan <- MAPPING
 
 	prettyOptions := lo.Map(options, func(opt *nix.HomeManagerOption, _ int) string {
 		return fmt.Sprintf("%s - %s\n%s\nExample: %s\nDefault: %s\n",
 			opt.Title, opt.Description, opt.Position, opt.Example, opt.Default)
 	})
 
-	chStatus <- WAITING
+	statusChan <- WAITING
 
 	return strings.Join(prettyOptions, "\n\n"), nil
 }
 
-func (app App) searchNixOSOptions(ctx context.Context, input string, chStatus chan string) (string, error) {
-	defer close(chStatus)
+func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
+	defer close(statusChan)
 
-	channel, found := app.config.Internal.Nix.FindChannel(app.tabs.search.CurrentChannelID)
+	channel, found := g.config.Internal.Nix.FindChannel(g.tabs.search.CurrentChannelID)
 	if !found {
 		return "", ErrChannelNotFound
 	}
 
-	chStatus <- SEARCHING
+	statusChan <- SEARCHING
 
-	options, err := app.nixClient.SearchNixOSOptions(ctx, channel.Branch, input, 100)
+	options, err := g.nixClient.SearchNixOSOptions(ctx, channel.Branch, input, 100)
 	if err != nil {
 		return "", err
 	}
 
-	chStatus <- MAPPING
+	statusChan <- MAPPING
 
 	prettyOptions := lo.Map(options, func(option *nix.Option, _ int) string {
 		return fmt.Sprintf("%s - %s\nExample: %v\nDefault: %s\n",
@@ -117,51 +117,51 @@ func (app App) searchNixOSOptions(ctx context.Context, input string, chStatus ch
 
 	r := strings.Join(prettyOptions, "\n\n")
 
-	chStatus <- WAITING
+	statusChan <- WAITING
 
 	return r, nil
 }
 
-func (app App) searchNixPackages(ctx context.Context, input string, chStatus chan string) (string, error) {
-	defer close(chStatus)
+func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan chan string) (string, error) {
+	defer close(statusChan)
 
-	chStatus <- SEARCHING
+	statusChan <- SEARCHING
 
-	channel, found := app.config.Internal.Nix.FindChannel(app.tabs.search.CurrentChannelID)
+	channel, found := g.config.Internal.Nix.FindChannel(g.tabs.search.CurrentChannelID)
 	if !found {
 		return "", ErrChannelNotFound
 	}
 
-	packages, err := app.nixClient.SearchPackages(ctx, channel.Branch, input, 100)
+	packages, err := g.nixClient.SearchPackages(ctx, channel.Branch, input, 100)
 	if err != nil {
 		return "", err
 	}
 
-	chStatus <- MAPPING
+	statusChan <- MAPPING
 
 	prettyPkgs := lo.Map(packages, func(pkg *nix.Package, _ int) string {
 		return fmt.Sprintf("%s (%s) - %s\nPrograms: %v\nOutputs: %v\n%s\n", pkg.Name, pkg.Version,
-			pkg.Description, pkg.Programs, pkg.Outputs, app.findSource(channel, *pkg.RepositoryPosition))
+			pkg.Description, pkg.Programs, pkg.Outputs, g.findSource(channel, *pkg.RepositoryPosition))
 	})
 
 	r := strings.Join(prettyPkgs, "\n\n")
 
-	chStatus <- WAITING
+	statusChan <- WAITING
 
 	return r, nil
 }
 
-func (app App) searchNixFlakePackages(ctx context.Context, input string, chStatus chan string) (string, error) {
-	defer close(chStatus)
+func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusChan chan string) (string, error) {
+	defer close(statusChan)
 
-	chStatus <- SEARCHING
+	statusChan <- SEARCHING
 
-	packages, err := app.nixClient.SearchFlakePackages(ctx, app.tabs.search.CurrentChannelID, input, 100)
+	packages, err := g.nixClient.SearchFlakePackages(ctx, g.tabs.search.CurrentChannelID, input, 100)
 	if err != nil {
 		return "", err
 	}
 
-	chStatus <- MAPPING
+	statusChan <- MAPPING
 
 	prettyPkgs := lo.Map(packages, func(pkg *nix.FlakePackage, _ int) string {
 		return fmt.Sprintf("%s (%s) - %s\nFlake: %s\nPrograms: %v\nOutputs: %v\n",
@@ -170,22 +170,22 @@ func (app App) searchNixFlakePackages(ctx context.Context, input string, chStatu
 
 	r := strings.Join(prettyPkgs, "\n\n")
 
-	chStatus <- WAITING
+	statusChan <- WAITING
 
 	return r, nil
 }
 
-func (app App) searchNixFlakeOptions(ctx context.Context, input string, chStatus chan string) (string, error) {
-	defer close(chStatus)
+func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
+	defer close(statusChan)
 
-	chStatus <- SEARCHING
+	statusChan <- SEARCHING
 
-	options, err := app.nixClient.SearchFlakeOptions(ctx, app.tabs.search.CurrentChannelID, input, 100)
+	options, err := g.nixClient.SearchFlakeOptions(ctx, g.tabs.search.CurrentChannelID, input, 100)
 	if err != nil {
 		return "", err
 	}
 
-	chStatus <- MAPPING
+	statusChan <- MAPPING
 
 	prettyOptions := lo.Map(options, func(option *nix.FlakeOption, _ int) string {
 		return fmt.Sprintf("%s - %s\nFlake: %s\nExample: %v\nDefault: %s\n",
@@ -194,12 +194,12 @@ func (app App) searchNixFlakeOptions(ctx context.Context, input string, chStatus
 
 	r := strings.Join(prettyOptions, "\n\n")
 
-	chStatus <- WAITING
+	statusChan <- WAITING
 
 	return r, nil
 }
 
-func (app App) findSource(channel config.NixChannel, source string) string {
+func (g GUI) findSource(channel config.NixChannel, source string) string {
 	return fmt.Sprintf("https://github.com/NixOS/nixpkgs/blob/%s/%s",
 		channel.Branch, strings.Replace(source, ":", "#L", -1))
 }

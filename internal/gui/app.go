@@ -21,18 +21,25 @@ import (
 )
 
 type (
-	App struct {
+	GUI struct {
+		// The nix client used to perform searches.
 		nixClient *nix_search.Client
-		config    *config.Config
+		// The configuration for the application.
+		config *config.Config
 
+		// The GUI widgets.
 		widgets widgets
-		tabs    *tabs
+		// The GUI Tabs.
+		tabs *tabs
 	}
 
+	// The GUI tabs.
 	tabs struct {
+		// The current search tab.
 		search *searchTabConfig
 	}
 
+	// The GUI widgets.
 	widgets struct {
 		searchInput      *textinput.TextInput
 		resultsBoard     *text.Text
@@ -43,28 +50,28 @@ type (
 	}
 )
 
-func New(config *config.Config) (App, error) {
-	app := App{
+func New(config *config.Config) (GUI, error) {
+	gui := GUI{
 		nixClient: nix_search.NewClient(config),
 		config:    config,
 	}
 
-	app.tabs = &tabs{
-		search: app.getDefaultSearchTab(),
+	gui.tabs = &tabs{
+		search: gui.getDefaultSearchTab(),
 	}
 
-	if err := app.initWidgets(); err != nil {
-		return App{}, err
+	if err := gui.initWidgets(); err != nil {
+		return GUI{}, err
 	}
 
-	return app, nil
+	return gui, nil
 }
 
-func (a App) Run(ctx context.Context) error {
-	return a.run(ctx)
+func (g GUI) Run(ctx context.Context) error {
+	return g.run(ctx)
 }
 
-func (app App) run(ctx context.Context) error {
+func (g GUI) run(ctx context.Context) error {
 	t, err := tcell.New()
 	if err != nil {
 		return err
@@ -81,7 +88,7 @@ func (app App) run(ctx context.Context) error {
 		grid.RowHeightPerc(99,
 			grid.RowHeightFixed(5,
 				grid.Widget(
-					app.widgets.searchInput,
+					g.widgets.searchInput,
 					container.Border(linestyle.Light),
 					container.AlignHorizontal(align.HorizontalCenter),
 					container.Focused(),
@@ -91,28 +98,28 @@ func (app App) run(ctx context.Context) error {
 			grid.RowHeightPerc(6,
 				grid.ColWidthPerc(25,
 					grid.Widget(
-						app.widgets.currentLabel,
+						g.widgets.currentLabel,
 						container.BorderTitle("Current tab"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorMagenta),
 					)),
 				grid.ColWidthPerc(20,
 					grid.Widget(
-						app.widgets.currentChannelId,
+						g.widgets.currentChannelId,
 						container.BorderTitle("Channel ID"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorNavy),
 					)),
 				grid.ColWidthPerc(20,
 					grid.Widget(
-						app.widgets.currentStatus,
+						g.widgets.currentStatus,
 						container.BorderTitle("Status"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorGreen),
 					)),
 				grid.ColWidthPerc(35,
 					grid.Widget(
-						app.widgets.currentSource,
+						g.widgets.currentSource,
 						container.BorderTitle("Source"),
 						container.Border(linestyle.Light),
 						container.BorderColor(cell.ColorFuchsia),
@@ -120,7 +127,7 @@ func (app App) run(ctx context.Context) error {
 			),
 			grid.RowHeightPerc(90,
 				grid.Widget(
-					app.widgets.resultsBoard,
+					g.widgets.resultsBoard,
 					container.Border(linestyle.Light),
 					container.BorderTitle("Search results"),
 					container.BorderColor(cell.ColorAqua),
@@ -145,16 +152,16 @@ func (app App) run(ctx context.Context) error {
 			case lo.Contains([]keyboard.Key{keyboard.KeyCtrlC}, k.Key):
 				cancel()
 			case k.Key == keyboard.KeyCtrlLsqBracket:
-				app.previousTab()
+				g.previousTab()
 
 			case k.Key == keyboard.KeyCtrlRsqBracket:
-				app.nextTab()
+				g.nextTab()
 
 			case k.Key == keyboard.KeyCtrlSpace:
-				app.nextChannel()
+				g.nextChannel()
 
 			case k.Key == keyboard.KeyCtrlQ:
-				app.clearSearchInput()
+				g.clearSearchInput()
 			}
 		}),
 		termdash.RedrawInterval(350 * time.Millisecond),

@@ -2,9 +2,9 @@ package gui
 
 import "github.com/samber/lo"
 
-func (app App) getCurrentBranchIndex() int {
-	_, index, found := lo.FindIndexOf(app.tabs.search.ChannelIDs, func(channelId string) bool {
-		return channelId == app.tabs.search.CurrentChannelID
+func (g GUI) getCurrentBranchIndex() int {
+	_, index, found := lo.FindIndexOf(g.tabs.search.ChannelIDs, func(channelId string) bool {
+		return channelId == g.tabs.search.CurrentChannelID
 	})
 	if found {
 		return index
@@ -13,35 +13,17 @@ func (app App) getCurrentBranchIndex() int {
 	return 0
 }
 
-// func (app *App) previousChannel() {
-// 	index := app.getCurrentBranchIndex()
+func (g *GUI) nextChannel() {
+	index := g.getCurrentBranchIndex()
 
-// 	if index-1 >= 0 {
-// 		app.tabs.search.CurrentChannelID = app.tabs.search.ChannelIDs[index-1]
-// 		app.updateCurrentChannelID()
-// 	}
-// }
-
-// func (app *App) nextChannel() {
-// 	index := app.getCurrentBranchIndex()
-
-// 	if index+1 < len(app.tabs.search.ChannelIDs) {
-// 		app.tabs.search.CurrentChannelID = app.tabs.search.ChannelIDs[index+1]
-// 		app.updateCurrentChannelID()
-// 	}
-// }
-
-func (app *App) nextChannel() {
-	index := app.getCurrentBranchIndex()
-
-	if len(app.tabs.search.ChannelIDs) == 0 {
+	if len(g.tabs.search.ChannelIDs) == 0 {
 		return
-	} else if index+1 == len(app.tabs.search.ChannelIDs) {
+	} else if index+1 == len(g.tabs.search.ChannelIDs) {
 		index = 0
 	} else {
 		index++
 	}
 
-	app.tabs.search.CurrentChannelID = app.tabs.search.ChannelIDs[index]
-	app.updateCurrentChannelID()
+	g.tabs.search.CurrentChannelID = g.tabs.search.ChannelIDs[index]
+	g.updateCurrentChannelID()
 }
