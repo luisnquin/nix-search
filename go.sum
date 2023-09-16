@@ -23,8 +23,6 @@ github.com/lucasb-eyer/go-colorful v1.2.0 h1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69
 github.com/lucasb-eyer/go-colorful v1.2.0/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/luisnquin/flaggy v0.1.2 h1:IGnx1vRMThvseYcidLIj9zwjtt9w7Or8ebgtarjGfro=
 github.com/luisnquin/flaggy v0.1.2/go.mod h1:TwHgbSw+6rOM27V/fpkgG/ht3KUdyuMswVKnSkllvQM=
-github.com/luisnquin/flaggy v0.2.1 h1:O+fRDCN/G1Lu0LmI7IJm+u51+lDt7z3UwtgKccKAAMo=
-github.com/luisnquin/flaggy v0.2.1/go.mod h1:TwHgbSw+6rOM27V/fpkgG/ht3KUdyuMswVKnSkllvQM=
 github.com/mattn/go-runewidth v0.0.14/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZgg3U=
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
