@@ -2,8 +2,10 @@ package nix_search
 
 import (
 	"context"
+	"strings"
 
 	"github.com/luisnquin/nix-search/internal/nix"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/samber/lo"
 )
 
@@ -44,6 +46,9 @@ func (c Client) SearchPackages(ctx context.Context, channelBranch, searchTerm st
 		return nil, err
 	}
 
+	r := strings.NewReplacer("\n", " ")
+	sp := bluemonday.StrictPolicy()
+
 	pkgs := make([]*nix.Package, len(response.Hits.Items))
 
 	for i, item := range response.Hits.Items {
@@ -73,7 +78,7 @@ func (c Client) SearchPackages(ctx context.Context, channelBranch, searchTerm st
 			Name:               item.Source.Name,
 			Pname:              item.Source.Attr,
 			Description:        item.Source.Description,
-			LongDescription:    lo.ToPtr(item.Source.LongDescription),
+			LongDescription:    strings.TrimSpace(r.Replace(sp.Sanitize(item.Source.LongDescription))),
 			Version:            item.Source.Version,
 			Set:                lo.ToPtr(item.Source.AttrSet),
 			Programs:           item.Source.Programs,

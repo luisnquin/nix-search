@@ -16,7 +16,7 @@ type (
 		PackageAttrSet       *string       `json:"package_attr_set"`
 		PackageName          string        `json:"package_pname"`
 		PackageDescription   string        `json:"package_description"`
-		PackageLongDesc      *string       `json:"package_longDescription"`
+		PackageLongDesc      string        `json:"package_longDescription"`
 		PackageVersion       string        `json:"package_pversion"`
 		PackagePlatforms     []string      `json:"package_platforms"`
 		PackageOutputs       []string      `json:"package_outputs"`

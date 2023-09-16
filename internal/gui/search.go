@@ -2,6 +2,7 @@ package gui
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"net/url"
 	"strings"
@@ -18,6 +19,9 @@ const (
 	FETCHING  = "fetching"
 	WAITING   = "waiting"
 )
+
+//go:embed outputs/nix-packages.tpl
+var nixPackagesOutputTpl string
 
 var ErrChannelNotFound = fmt.Errorf("channel not found")
 
@@ -145,16 +149,14 @@ func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan cha
 
 	statusChan <- MAPPING
 
-	prettyPkgs := lo.Map(packages, func(pkg *nix.Package, _ int) string {
-		return fmt.Sprintf("%s (%s) - %s\nPrograms: %v\nOutputs: %v\n%s\n", pkg.Name, pkg.Version,
-			pkg.Description, pkg.Programs, pkg.Outputs, g.findSource(channel, *pkg.RepositoryPosition))
-	})
-
-	r := strings.Join(prettyPkgs, "\n\n")
+	text, err := getRenderedText(nix.NIX_PACKAGES, nixPackagesOutputTpl, packages)
+	if err != nil {
+		return "", err
+	}
 
 	statusChan <- WAITING
 
-	return r, nil
+	return text, nil
 }
 
 func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusChan chan string) (string, error) {

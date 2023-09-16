@@ -8,8 +8,8 @@ type (
 		// The package name used as identifier.
 		Pname string `json:"pname"`
 		// The package description.
-		Description     string  `json:"description"`
-		LongDescription *string `json:"long_description"`
+		Description     string `json:"description"`
+		LongDescription string `json:"long_description"`
 		// The package version.
 		Version string `json:"version"`
 		// The set to which the package belongs to.
