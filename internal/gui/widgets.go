@@ -15,12 +15,12 @@ func (g *GUI) initWidgets() error {
 
 	g.widgets.resultsBoard, err = g.getResultsBoard()
 	if err != nil {
-		return fmt.Errorf("results board: %w", err)
+		return fmt.Errorf("results board widget: %w", err)
 	}
 
 	g.widgets.searchInput, err = g.getSearchTextInput()
 	if err != nil {
-		return fmt.Errorf("search input: %w", err)
+		return fmt.Errorf("search input widget: %w", err)
 	}
 
 	g.widgets.currentStatus, err = g.getCurrentStatusWidget()

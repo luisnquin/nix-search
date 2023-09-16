@@ -38,6 +38,8 @@ func (g *GUI) performSearch(ctx context.Context, input string) {
 }
 
 func (g *GUI) performSearchAndGetResults(ctx context.Context, input string) (string, error) {
+	defer g.handleProgramPanic()
+
 	statusChan := make(chan string)
 
 	go func() {

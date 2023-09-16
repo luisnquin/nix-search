@@ -2,6 +2,8 @@ package gui
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/luisnquin/nix-search/internal/config"
@@ -17,7 +19,6 @@ import (
 	"github.com/mum4k/termdash/terminal/terminalapi"
 	"github.com/mum4k/termdash/widgets/text"
 	"github.com/mum4k/termdash/widgets/textinput"
-	"github.com/samber/lo"
 )
 
 type (
@@ -27,6 +28,8 @@ type (
 		// The configuration for the application.
 		config *config.Config
 
+		// The tcell terminal.
+		terminal *tcell.Terminal
 		// The GUI widgets.
 		widgets widgets
 		// The GUI Tabs.
@@ -50,9 +53,16 @@ type (
 	}
 )
 
+// Prepare the the GUI components and returns it.
 func New(config *config.Config) (GUI, error) {
+	terminal, err := tcell.New()
+	if err != nil {
+		return GUI{}, fmt.Errorf("unable to create tcell terminal: %w", err)
+	}
+
 	gui := GUI{
 		nixClient: nix_search.NewClient(config),
+		terminal:  terminal,
 		config:    config,
 	}
 
@@ -67,18 +77,19 @@ func New(config *config.Config) (GUI, error) {
 	return gui, nil
 }
 
+// Run the GUI of the program.
 func (g GUI) Run(ctx context.Context) error {
-	return g.run(ctx)
-}
+	defer g.handleProgramPanic()
+	defer g.terminal.Close()
 
-func (g GUI) run(ctx context.Context) error {
-	t, err := tcell.New()
-	if err != nil {
+	if err := g.run(ctx); err != nil {
 		return err
 	}
 
-	defer t.Close()
+	return nil
+}
 
+func (g GUI) run(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -141,7 +152,7 @@ func (g GUI) run(ctx context.Context) error {
 		return err
 	}
 
-	c, err := container.New(t, gridOpts...)
+	c, err := container.New(g.terminal, gridOpts...)
 	if err != nil {
 		return err
 	}
@@ -149,8 +160,6 @@ func (g GUI) run(ctx context.Context) error {
 	termOptions := []termdash.Option{
 		termdash.KeyboardSubscriber(func(k *terminalapi.Keyboard) {
 			switch { // keyboard.KeyEsc
-			case lo.Contains([]keyboard.Key{keyboard.KeyCtrlC}, k.Key):
-				cancel()
 			case k.Key == keyboard.KeyCtrlLsqBracket:
 				g.previousTab()
 
@@ -162,10 +171,20 @@ func (g GUI) run(ctx context.Context) error {
 
 			case k.Key == keyboard.KeyCtrlQ:
 				g.clearSearchInput()
+
+			case k.Key == keyboard.KeyCtrlC:
+				cancel()
 			}
 		}),
 		termdash.RedrawInterval(350 * time.Millisecond),
 	}
 
-	return termdash.Run(ctx, t, c, termOptions...)
+	return termdash.Run(ctx, g.terminal, c, termOptions...)
+}
+
+func (g GUI) handleProgramPanic() {
+	if err := recover(); err != nil {
+		g.terminal.Close()
+		log.Fatal(err)
+	}
 }
