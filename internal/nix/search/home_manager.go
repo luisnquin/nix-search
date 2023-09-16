@@ -47,7 +47,7 @@ func (c *Client) getHomeManagerOptions(ctx context.Context) ([]*nix.HomeManagerO
 	var err error
 
 	c.store.homeManagerShell.Once.Do(func() {
-		c.store.homeManagerShell.data, err = c.fetchHomeManagerOptions()
+		c.store.homeManagerShell.data, err = c.fetchHomeManagerOptions(ctx)
 	})
 	if err != nil {
 		return nil, err
@@ -56,10 +56,10 @@ func (c *Client) getHomeManagerOptions(ctx context.Context) ([]*nix.HomeManagerO
 	return c.store.homeManagerShell.data.Options, nil
 }
 
-func (c Client) fetchHomeManagerOptions() (*homeManagerOptionsData, error) {
+func (c Client) fetchHomeManagerOptions(ctx context.Context) (*homeManagerOptionsData, error) {
 	optionsUrl := c.config.Internal.Nix.Sources.HomeManagerOptions.URL
 
-	response, err := doGET(optionsUrl)
+	response, err := doGET(ctx, optionsUrl)
 	if err != nil {
 		return nil, err
 	}

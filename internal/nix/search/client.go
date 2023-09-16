@@ -2,6 +2,7 @@ package nix_search
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"html/template"
 	"io"
@@ -85,10 +86,10 @@ func prepareQuery(rawQuery, searchTerm string) io.Reader {
 	return &b
 }
 
-func doGET(url string) (*http.Response, error) {
+func doGET(ctx context.Context, url string) (*http.Response, error) {
 	httpClient := http.Client{Timeout: CLIENT_TIMEOUT}
 
-	r, err := http.NewRequest(http.MethodGet, url, http.NoBody)
+	r, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return nil, err
 	}
