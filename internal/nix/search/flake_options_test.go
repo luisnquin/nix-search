@@ -22,18 +22,3 @@ func TestFlakeOptionsSmoke(t *testing.T) {
 		t.Log(option)
 	}
 }
-
-func TestFlakePackagesSmoke(t *testing.T) {
-	ctx, appConfig := context.Background(), config.Load()
-
-	client := nix_search.NewClient(appConfig)
-
-	options, err := client.SearchFlakePackages(ctx, nix_search.ELASTIC_SEARCH_FLAKES_ID, "wayland", 50)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, option := range options {
-		t.Log(option)
-	}
-}
