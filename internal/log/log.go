@@ -22,7 +22,7 @@ func New(logFilePath string) (Logger, error) {
 		return Logger{}, getErrLogPathIsDir()
 	}
 
-	f, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	f, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return Logger{}, err
 	}
