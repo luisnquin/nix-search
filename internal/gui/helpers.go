@@ -16,7 +16,7 @@ func getRenderedText[T any](name, branch, tplText string, items []T) (string, er
 		return "", err
 	}
 
-	transformSource := func(source string) string {
+	transformSource := func(source string) string { // TODO: branch as optional parameter
 		return fmt.Sprintf("https://github.com/NixOS/nixpkgs/blob/%s/%s",
 			branch, strings.Replace(source, ":", "#L", -1))
 	}

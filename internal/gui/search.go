@@ -5,10 +5,9 @@ import (
 	_ "embed"
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/luisnquin/nix-search/internal/nix"
-	"github.com/samber/lo"
+	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 )
 
 // Search states.
@@ -99,16 +98,7 @@ func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusC
 
 	statusChan <- MAPPING
 
-	prettyOptions := lo.Map(options, func(opt *nix.HomeManagerOption, _ int) string {
-		example := lo.If(opt.Example != "", opt.Example).Else("<nothing>")
-
-		noteOrNothing := lo.If(opt.Note != "", fmt.Sprintf("Note: %s\n", opt.Note)).Else("")
-
-		return fmt.Sprintf("%s - %s\n%sType: %s\nExample: %s\nDefault: %s\nSource: %s\n",
-			opt.Title, opt.Description, noteOrNothing, opt.Type, example, opt.Default, opt.Position)
-	})
-
-	return strings.Join(prettyOptions, "\n\n"), nil
+	return getRenderedText(nix.HOME_OPTIONS, "", homeOptionsOutputTpl, options)
 }
 
 func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
@@ -128,12 +118,7 @@ func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan ch
 
 	statusChan <- MAPPING
 
-	text, err := getRenderedText(nix.NIXOS_OPTIONS, channel.Branch, nioxsOptionsOutputTpl, options)
-	if err != nil {
-		return "", err
-	}
-
-	return text, nil
+	return getRenderedText(nix.NIXOS_OPTIONS, channel.Branch, nioxsOptionsOutputTpl, options)
 }
 
 func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan chan string) (string, error) {
@@ -153,12 +138,7 @@ func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan cha
 
 	statusChan <- MAPPING
 
-	text, err := getRenderedText(nix.NIX_PACKAGES, channel.Branch, nixPackagesOutputTpl, packages)
-	if err != nil {
-		return "", err
-	}
-
-	return text, nil
+	return getRenderedText(nix.NIX_PACKAGES, channel.Branch, nixPackagesOutputTpl, packages)
 }
 
 func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusChan chan string) (string, error) {
@@ -173,14 +153,7 @@ func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusCha
 
 	statusChan <- MAPPING
 
-	prettyPkgs := lo.Map(packages, func(pkg *nix.FlakePackage, _ int) string {
-		return fmt.Sprintf("%s (%s) - %s\nFlake: %s\nPrograms: %v\nOutputs: %v\n",
-			pkg.Name, pkg.Version, pkg.Description, pkg.Flake.Name, pkg.Programs, pkg.Outputs)
-	})
-
-	r := strings.Join(prettyPkgs, "\n\n")
-
-	return r, nil
+	return getRenderedText(nix.FLAKE_PACKAGES, nix_search.ELASTIC_SEARCH_FLAKES_ID, flakePackagesOutputTpl, packages)
 }
 
 func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
@@ -195,12 +168,5 @@ func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan
 
 	statusChan <- MAPPING
 
-	prettyOptions := lo.Map(options, func(option *nix.FlakeOption, _ int) string {
-		return fmt.Sprintf("%s - %s\nFlake: %s\nExample: %v\nDefault: %s\n",
-			option.Name, option.Description, option.Flake.Name, lo.FromPtrOr(option.Example, "null"), option.Default)
-	})
-
-	r := strings.Join(prettyOptions, "\n\n")
-
-	return r, nil
+	return getRenderedText(nix.FLAKE_OPTIONS, "", flakeOptionsOutputTpl, options)
 }
