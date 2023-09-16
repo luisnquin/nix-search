@@ -3,10 +3,10 @@ package gui
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/luisnquin/nix-search/internal/config"
+	"github.com/luisnquin/nix-search/internal/log"
 	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 	"github.com/mum4k/termdash"
 	"github.com/mum4k/termdash/align"
@@ -27,6 +27,7 @@ type (
 		nixClient *nix_search.Client
 		// The configuration for the application.
 		config *config.Config
+		logger log.Logger
 
 		// The tcell terminal.
 		terminal *tcell.Terminal
@@ -54,25 +55,36 @@ type (
 )
 
 // Prepare the the GUI components and returns it.
-func New(config *config.Config) (GUI, error) {
+func New(logger log.Logger, config *config.Config, nixClient *nix_search.Client) (GUI, error) {
 	terminal, err := tcell.New()
 	if err != nil {
+		logger.Err(err).Msg("unable to create tcell terminal")
+
 		return GUI{}, fmt.Errorf("unable to create tcell terminal: %w", err)
 	}
 
+	logger.Trace().Msg("initializing program components...")
+
 	gui := GUI{
-		nixClient: nix_search.NewClient(config),
+		nixClient: nixClient,
 		terminal:  terminal,
 		config:    config,
+		logger:    logger,
 	}
 
 	gui.tabs = &tabs{
 		search: gui.getDefaultSearchTab(),
 	}
 
+	logger.Trace().Msg("initializing GUI widgets...")
+
 	if err := gui.initWidgets(); err != nil {
+		logger.Err(err).Msg("an error was detected while initializing GUI widgets")
+
 		return GUI{}, err
 	}
+
+	logger.Trace().Msg("initialized, providing a GUI instance ready to be used...")
 
 	return gui, nil
 }
@@ -80,11 +92,26 @@ func New(config *config.Config) (GUI, error) {
 // Run the GUI of the program.
 func (g GUI) Run(ctx context.Context) error {
 	defer g.handleProgramPanic()
-	defer g.terminal.Close()
+	defer func() {
+		g.logger.Debug().Msg("closing tcell terminal...")
+		g.terminal.Close()
+		g.logger.Debug().Msg("tcell terminal has been closed")
+	}()
+
+	tsize := g.terminal.Size()
+
+	g.logger.Trace().
+		Int("tx", tsize.X).Int("ty", tsize.Y).
+		Bool("¿context is nil?", ctx == nil).Msg("starting the program GUI...")
 
 	if err := g.run(ctx); err != nil {
+		g.logger.Err(err).Str("current tab", g.tabs.search.String()).
+			Msg("error detected while running GUI...")
+
 		return err
 	}
+
+	g.logger.Trace().Msg("user exited GUI without errors")
 
 	return nil
 }
@@ -185,6 +212,6 @@ func (g GUI) run(ctx context.Context) error {
 func (g GUI) handleProgramPanic() {
 	if err := recover(); err != nil {
 		g.terminal.Close()
-		log.Fatal(err)
+		g.logger.Fatal().Any("error", err).Msg("catched during program panic")
 	}
 }

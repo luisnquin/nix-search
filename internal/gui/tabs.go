@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"fmt"
+
 	"github.com/luisnquin/nix-search/internal/config"
 	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 	"github.com/samber/lo"
@@ -31,6 +33,29 @@ const (
 	ELASTIC_SEARCH_SOURCE = "Elastic Search"
 	MEMORY_SOURCE         = "External file(in-memory)"
 )
+
+func (t searchTabConfig) String() string {
+	const tpl = `{"tab": {"name": "%s", "source": "%s", "wait_for_enter": %v, "channel_ids": %+q, "current_channel_id": "%s"}}`
+
+	return fmt.Sprintf(tpl, t.Name, t.Source, t.WaitForEnter, t.ChannelIDs, t.CurrentChannelID)
+}
+
+func (t searchTab) String() string {
+	switch t {
+	case HOME_MANAGER_OPTIONS:
+		return "home manager"
+	case FLAKES_PACKAGES:
+		return "flake packages"
+	case FLAKES_OPTIONS:
+		return "flake options"
+	case NIXOS_OPTIONS:
+		return "nix options"
+	case NIX_PACKAGES:
+		return "nix packages"
+	default:
+		return "unknown"
+	}
+}
 
 func (g *GUI) getSearchTabs() []searchTabConfig {
 	channelIds := lo.Map(g.config.Internal.Nix.Channels, func(config config.NixChannel, _ int) string {
