@@ -3,16 +3,27 @@ package gui
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"text/template"
+
+	"github.com/luisnquin/nix-search/internal/config"
 )
 
-func getRenderedText[T any](name, tplText string, items []T) (string, error) {
+func getRenderedText[T any](name, branch, tplText string, items []T) (string, error) {
 	data, err := structSliceToMapSlice(items)
 	if err != nil {
 		return "", err
 	}
 
-	tpl := template.New(name)
+	transformSource := func(source string) string {
+		return fmt.Sprintf("https://github.com/NixOS/nixpkgs/blob/%s/%s",
+			branch, strings.Replace(source, ":", "#L", -1))
+	}
+
+	tpl := template.New(name).Funcs(template.FuncMap{
+		"transform_source": transformSource,
+	})
 	tpl = template.Must(tpl.Parse(tplText))
 
 	var b bytes.Buffer
@@ -38,4 +49,9 @@ func structSliceToMapSlice[T any](items []T) ([]map[string]any, error) {
 	}
 
 	return results, nil
+}
+
+func transform_source(channel config.NixChannel, source string) string {
+	return fmt.Sprintf("https://github.com/NixOS/nixpkgs/blob/%s/%s",
+		channel.Branch, strings.Replace(source, ":", "#L", -1))
 }

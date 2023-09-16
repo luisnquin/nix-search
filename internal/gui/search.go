@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/luisnquin/nix-search/internal/config"
 	"github.com/luisnquin/nix-search/internal/nix"
 	"github.com/samber/lo"
 )
@@ -20,8 +19,18 @@ const (
 	WAITING   = "waiting"
 )
 
-//go:embed outputs/nix-packages.tpl
-var nixPackagesOutputTpl string
+var (
+	//go:embed outputs/nix-packages.tpl
+	nixPackagesOutputTpl string
+	//go:embed outputs/nixos-options.tpl
+	nioxsOptionsOutputTpl string
+	//go:embed outputs/home-options.tpl
+	homeOptionsOutputTpl string
+	//go:embed outputs/flake-options.tpl
+	flakeOptionsOutputTpl string
+	//go:embed outputs/flake-packages.tpl
+	flakePackagesOutputTpl string
+)
 
 var ErrChannelNotFound = fmt.Errorf("channel not found")
 
@@ -99,7 +108,6 @@ func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusC
 			opt.Title, opt.Description, noteOrNothing, opt.Type, example, opt.Default, opt.Position)
 	})
 
-
 	return strings.Join(prettyOptions, "\n\n"), nil
 }
 
@@ -120,15 +128,12 @@ func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan ch
 
 	statusChan <- MAPPING
 
-	prettyOptions := lo.Map(options, func(option *nix.Option, _ int) string {
-		return fmt.Sprintf("%s - %s\nExample: %v\nDefault: %s\n",
-			option.Name, option.Description, lo.FromPtrOr(option.Example, "null"), option.Default)
-	})
+	text, err := getRenderedText(nix.NIXOS_OPTIONS, channel.Branch, nioxsOptionsOutputTpl, options)
+	if err != nil {
+		return "", err
+	}
 
-	r := strings.Join(prettyOptions, "\n\n")
-
-
-	return r, nil
+	return text, nil
 }
 
 func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan chan string) (string, error) {
@@ -148,7 +153,7 @@ func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan cha
 
 	statusChan <- MAPPING
 
-	text, err := getRenderedText(nix.NIX_PACKAGES, nixPackagesOutputTpl, packages)
+	text, err := getRenderedText(nix.NIX_PACKAGES, channel.Branch, nixPackagesOutputTpl, packages)
 	if err != nil {
 		return "", err
 	}
@@ -198,9 +203,4 @@ func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan
 	r := strings.Join(prettyOptions, "\n\n")
 
 	return r, nil
-}
-
-func (g GUI) findSource(channel config.NixChannel, source string) string {
-	return fmt.Sprintf("https://github.com/NixOS/nixpkgs/blob/%s/%s",
-		channel.Branch, strings.Replace(source, ":", "#L", -1))
 }
