@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "properties": {
+        "search_tabs": {
+            "type": "object",
+            "properties": {
+                "selected": {
+                    "$ref": "#/$defs/nix-source"
+                },
+                "order": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "string",
+                        "enum": ["nix-packages", "nixos-options", "home-options", "flake-options", "flake-packages"]
+                    }
+                }
+            }
+        }
+    },
+    "$defs": {
+        "nix-source": {
+            "type": "string",
+            "enum": ["nix-packages", "nixos-options", "home-options", "flake-options", "flake-packages"]
+        }
+    }
+}
