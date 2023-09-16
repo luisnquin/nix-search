@@ -2,8 +2,10 @@ package nix_search
 
 import (
 	"context"
+	"strings"
 
 	"github.com/luisnquin/nix-search/internal/nix"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type (
@@ -45,6 +47,9 @@ func (c Client) SearchFlakePackages(ctx context.Context, flakesBranchId, searchT
 		return nil, err
 	}
 
+	replacer := strings.NewReplacer("\n", " ")
+	sp := bluemonday.StrictPolicy()
+
 	packages := make([]*nix.FlakePackage, len(response.Hits.Items))
 
 	for i, item := range response.Hits.Items {
@@ -85,7 +90,7 @@ func (c Client) SearchFlakePackages(ctx context.Context, flakesBranchId, searchT
 				Name:               item.Source.PackageName,
 				Pname:              item.Source.PackageAttr,
 				Description:        item.Source.PackageDescription,
-				LongDescription:    item.Source.PackageLongDesc,
+				LongDescription:    replacer.Replace(sp.Sanitize(item.Source.PackageLongDesc)),
 				Version:            item.Source.PackageVersion,
 				Set:                item.Source.PackageAttrSet,
 				Programs:           item.Source.PackagePrograms,

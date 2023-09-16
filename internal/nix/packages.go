@@ -26,7 +26,7 @@ type (
 		// The homepage of the package.
 		Homepage *string `json:"homepage"`
 		// The license that the package is licensed under.
-		License *PackageLicense `json:"licenses"`
+		License *PackageLicense `json:"license"`
 		// The list of person who maintains the Nix package.
 		Maintainers []*PackageMaintainer `json:"maintainers"`
 		// The place in https://github.com/NixOS/nixpkgs where
