@@ -43,6 +43,7 @@ func (g *GUI) performSearch(ctx context.Context, input string) {
 
 func (g *GUI) performSearchAndGetResults(ctx context.Context, input string) (string, error) {
 	defer g.handleProgramPanic()
+	defer g.updateCurrentStatus(WAITING)
 
 	statusChan := make(chan string)
 
@@ -98,7 +99,6 @@ func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusC
 			opt.Title, opt.Description, noteOrNothing, opt.Type, example, opt.Default, opt.Position)
 	})
 
-	statusChan <- WAITING
 
 	return strings.Join(prettyOptions, "\n\n"), nil
 }
@@ -127,7 +127,6 @@ func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan ch
 
 	r := strings.Join(prettyOptions, "\n\n")
 
-	statusChan <- WAITING
 
 	return r, nil
 }
@@ -154,8 +153,6 @@ func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan cha
 		return "", err
 	}
 
-	statusChan <- WAITING
-
 	return text, nil
 }
 
@@ -178,8 +175,6 @@ func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusCha
 
 	r := strings.Join(prettyPkgs, "\n\n")
 
-	statusChan <- WAITING
-
 	return r, nil
 }
 
@@ -201,8 +196,6 @@ func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan
 	})
 
 	r := strings.Join(prettyOptions, "\n\n")
-
-	statusChan <- WAITING
 
 	return r, nil
 }
