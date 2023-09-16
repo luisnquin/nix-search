@@ -2,8 +2,10 @@ package gui
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/luisnquin/nix-search/internal/config"
+	"github.com/luisnquin/nix-search/internal/nix"
 	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 	"github.com/samber/lo"
 )
@@ -43,15 +45,15 @@ func (t searchTabConfig) String() string {
 func (t searchTab) String() string {
 	switch t {
 	case HOME_MANAGER_OPTIONS:
-		return "home manager"
+		return nix.HOME_OPTIONS
 	case FLAKES_PACKAGES:
-		return "flake packages"
+		return nix.FLAKE_PACKAGES
 	case FLAKES_OPTIONS:
-		return "flake options"
+		return nix.FLAKE_OPTIONS
 	case NIXOS_OPTIONS:
-		return "nix options"
+		return nix.NIXOS_OPTIONS
 	case NIX_PACKAGES:
-		return "nix packages"
+		return nix.NIX_PACKAGES
 	default:
 		return "unknown"
 	}
@@ -62,7 +64,7 @@ func (g *GUI) getSearchTabs() []searchTabConfig {
 		return config.ID
 	})
 
-	return []searchTabConfig{
+	tabs := []searchTabConfig{
 		{
 			Name:             NIX_PACKAGES,
 			Label:            "Nix packages",
@@ -103,10 +105,32 @@ func (g *GUI) getSearchTabs() []searchTabConfig {
 			CurrentChannelID: nix_search.ELASTIC_SEARCH_FLAKES_ID,
 		},
 	}
+
+	searchTabsOrder := g.config.SearchTabs.Order
+
+	sort.SliceStable(tabs, func(i, j int) bool {
+		iIndex := lo.IndexOf(searchTabsOrder, tabs[i].Name.String())
+		jIndex := lo.IndexOf(searchTabsOrder, tabs[j].Name.String())
+
+		return iIndex < jIndex
+	})
+
+	return tabs
 }
 
-func (g GUI) getDefaultSearchTab() *searchTabConfig {
-	config, _ := lo.Find(g.getSearchTabs(), func(item searchTabConfig) bool {
+func (g GUI) getSelectedOrDefaultTab() *searchTabConfig {
+	searchTabs := g.getSearchTabs()
+
+	if g.config.SearchTabs.Selected != "" {
+		config, found := lo.Find(searchTabs, func(config searchTabConfig) bool {
+			return config.Name.String() == g.config.SearchTabs.Selected
+		})
+		if found {
+			return &config
+		}
+	}
+
+	config, _ := lo.Find(searchTabs, func(item searchTabConfig) bool {
 		return item.Name == NIX_PACKAGES
 	})
 

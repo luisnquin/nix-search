@@ -9,9 +9,13 @@ import (
 )
 
 func TestFlakePackagesSmoke(t *testing.T) {
-	ctx, appConfig := context.Background(), config.Load()
+	appConfig, err := config.Load(true)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	client := nix_search.NewClient(appConfig)
+	ctx := context.Background()
 
 	options, err := client.SearchFlakePackages(ctx, nix_search.ELASTIC_SEARCH_FLAKES_ID, "wayland", 50)
 	if err != nil {

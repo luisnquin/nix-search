@@ -21,9 +21,13 @@ func main() {
 	flaggy.Parse()
 
 	ctx := context.Background()
-	appConfig := config.Load()
 
-	logger, err := log.New(appConfig.LogsPath)
+	appConfig, err := config.Load(false)
+	if err != nil {
+		log.Pretty.Fatal(err.Error())
+	}
+
+	logger, err := log.New(appConfig.LogFile)
 	must(err)
 
 	defer func() {
@@ -51,6 +55,6 @@ func main() {
 
 func must(err error) {
 	if err != nil {
-		panic(err)
+		log.Pretty.Fatal(err.Error())
 	}
 }

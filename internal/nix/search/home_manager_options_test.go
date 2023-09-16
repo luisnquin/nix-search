@@ -9,9 +9,13 @@ import (
 )
 
 func TestHomeManagerTest(t *testing.T) {
-	ctx, appConfig := context.Background(), config.Load()
+	appConfig, err := config.Load(true)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	client := nix_search.NewClient(appConfig)
+	ctx := context.Background()
 
 	options, err := client.SearchHomeManagerOptions(ctx, "programs.go")
 	if err != nil {

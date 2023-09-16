@@ -10,9 +10,13 @@ import (
 )
 
 func TestNixOSOptionsSmoke(t *testing.T) {
-	ctx, appConfig := context.Background(), config.Load()
+	appConfig, err := config.Load(true)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	client := nix_search.NewClient(appConfig)
+	ctx := context.Background()
 
 	channelStatus := nix.CHANNEL_STATUS_STABLE
 

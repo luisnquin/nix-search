@@ -73,7 +73,7 @@ func New(logger log.Logger, config *config.Config, nixClient *nix_search.Client)
 	}
 
 	gui.tabs = &tabs{
-		search: gui.getDefaultSearchTab(),
+		search: gui.getSelectedOrDefaultTab(),
 	}
 
 	logger.Trace().Msg("initializing GUI widgets...")

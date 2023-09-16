@@ -3,3 +3,4 @@
 **/*.draft.*
 **/nix-search
 **/build
+config.yml

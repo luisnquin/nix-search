@@ -3,6 +3,7 @@ module github.com/luisnquin/nix-search
 go 1.21
 
 require (
+	github.com/ProtonMail/go-appdir v1.1.0
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/gookit/color v1.5.4
 	github.com/luisnquin/flaggy v0.1.2
@@ -10,6 +11,7 @@ require (
 	github.com/mum4k/termdash v0.18.0
 	github.com/rs/zerolog v1.30.0
 	github.com/samber/lo v1.38.1
+	gopkg.in/yaml.v3 v3.0.1
 	mvdan.cc/xurls/v2 v2.5.0
 )
 
