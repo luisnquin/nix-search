@@ -78,6 +78,9 @@ func (c Client) fetchHomeManagerOptions(ctx context.Context) (*homeManagerOption
 	for i, option := range data.Options {
 		data.Options[i].Position = rxStrict.FindString(option.Position)
 		data.Options[i].Title = r.Replace(option.Title)
+		data.Options[i].Example = strings.TrimFunc(option.Example, func(r rune) bool {
+			return r == '\n'
+		})
 	}
 
 	return &data, err

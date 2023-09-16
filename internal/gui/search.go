@@ -86,8 +86,12 @@ func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusC
 	statusChan <- MAPPING
 
 	prettyOptions := lo.Map(options, func(opt *nix.HomeManagerOption, _ int) string {
-		return fmt.Sprintf("%s - %s\n%s\nExample: %s\nDefault: %s\n",
-			opt.Title, opt.Description, opt.Position, opt.Example, opt.Default)
+		example := lo.If(opt.Example != "", opt.Example).Else("<nothing>")
+
+		noteOrNothing := lo.If(opt.Note != "", fmt.Sprintf("Note: %s\n", opt.Note)).Else("")
+
+		return fmt.Sprintf("%s - %s\n%sType: %s\nExample: %s\nDefault: %s\nSource: %s\n",
+			opt.Title, opt.Description, noteOrNothing, opt.Type, example, opt.Default, opt.Position)
 	})
 
 	statusChan <- WAITING
