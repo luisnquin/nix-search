@@ -23,6 +23,7 @@ func getRenderedText[T any](name, branch, tplText string, items []T) (string, er
 
 	tpl := template.New(name).Funcs(template.FuncMap{
 		"transform_source": transformSource,
+		"sub":              func(a, b int) int { return a - b },
 	})
 	tpl = template.Must(tpl.Parse(tplText))
 

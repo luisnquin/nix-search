@@ -1,4 +1,4 @@
-{{ range . }}{{ .package.name }} ({{ .package.version }}){{ if or (gt (len .package.description) 50) (gt (len .package.name) 25)  }}
+{{ $total_minus_one := sub (len .) 1 }}{{ range $index, $_ := . }}{{ .package.name }} ({{ .package.version }}){{ if or (gt (len .package.description) 50) (gt (len .package.name) 25)  }}
 {{ .package.description }}{{ else }} - {{ .package.description }}{{ end }}
 
 Flake: {{ .flake.name }}
@@ -11,5 +11,5 @@ Outputs: {{ .package.outputs }}
 {{ end }}{{ if .package.repo_position }}Source: {{ .package.repo_position | transform_source }}
 {{ end }}License: {{ .package.license.full_name }}
 
---
+{{ if ne $index $total_minus_one }}--{{ end }}
 {{ end }}
