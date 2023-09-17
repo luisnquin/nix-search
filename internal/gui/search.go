@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/luisnquin/nix-search/internal/nix"
-	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
 )
 
 // Search states.
@@ -16,6 +15,8 @@ const (
 	FETCHING  = "fetching"
 	WAITING   = "waiting"
 )
+
+const DEFAULT_RESULTS_COUNT = 100
 
 var (
 	//go:embed outputs/nix-packages.tpl
@@ -108,7 +109,7 @@ func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan ch
 
 	statusChan <- SEARCHING
 
-	options, err := g.nixClient.SearchNixOSOptions(ctx, channel.Branch, input, 100)
+	options, err := g.nixClient.SearchNixOSOptions(ctx, channel.Branch, input, DEFAULT_RESULTS_COUNT)
 	if err != nil {
 		return "", err
 	}
@@ -129,7 +130,7 @@ func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan cha
 		return "", ErrChannelNotFound
 	}
 
-	packages, err := g.nixClient.SearchPackages(ctx, channel.Branch, input, 100)
+	packages, err := g.nixClient.SearchPackages(ctx, channel.Branch, input, DEFAULT_RESULTS_COUNT)
 	if err != nil {
 		return "", err
 	}
@@ -145,14 +146,14 @@ func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusCha
 
 	statusChan <- SEARCHING
 
-	packages, err := g.nixClient.SearchFlakePackages(ctx, g.tabs.search.CurrentChannelID, input, 100)
+	packages, err := g.nixClient.SearchFlakePackages(ctx, g.tabs.search.CurrentChannelID, input, DEFAULT_RESULTS_COUNT)
 	if err != nil {
 		return "", err
 	}
 
 	statusChan <- MAPPING
 
-	return getRenderedText(nix.FLAKE_PACKAGES, nix_search.ELASTIC_SEARCH_FLAKES_ID, flakePackagesOutputTpl, packages)
+	return getRenderedText(nix.FLAKE_PACKAGES, "", flakePackagesOutputTpl, packages)
 }
 
 func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
@@ -161,7 +162,7 @@ func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan
 
 	statusChan <- SEARCHING
 
-	options, err := g.nixClient.SearchFlakeOptions(ctx, g.tabs.search.CurrentChannelID, input, 100)
+	options, err := g.nixClient.SearchFlakeOptions(ctx, g.tabs.search.CurrentChannelID, input, DEFAULT_RESULTS_COUNT)
 	if err != nil {
 		return "", err
 	}
