@@ -3,6 +3,7 @@ package log
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -31,7 +32,8 @@ func New(logFilePath string) (Logger, error) {
 		return Logger{}, err
 	}
 
-	logger := zerolog.New(f)
+	zerolog.LevelFieldName = "lvl"
+	logger := zerolog.New(f).With().Int64("i", time.Now().Unix()).Logger()
 
 	return Logger{
 		Logger: &logger,
