@@ -152,6 +152,8 @@ func (g *GUI) nextTab() {
 
 		g.tabs.search = &tab
 		g.updateWidgetTexts()
+	} else {
+		g.logger.Trace().Msg("lower limit reached, tab will not be updated")
 	}
 }
 
@@ -166,5 +168,7 @@ func (g *GUI) previousTab() {
 
 		g.tabs.search = &tab
 		g.updateWidgetTexts()
+	} else {
+		g.logger.Trace().Msg("upper limit reached, tab will not be updated")
 	}
 }
