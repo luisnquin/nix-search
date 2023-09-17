@@ -1,4 +1,4 @@
-{{ range . }}{{ .name }}{{ $desc_len := len .description }}{{if gt $desc_len 50 }}
+{{ range . }}{{ .name }}{{if gt (len .description) 50 }}
 {{ .description }}{{ else }} - {{.description}}{{ end }}
 
 Type: {{ .type }}

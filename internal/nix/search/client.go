@@ -13,6 +13,7 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/luisnquin/nix-search/internal/config"
+	"github.com/luisnquin/nix-search/internal/nix"
 	"github.com/stoewer/go-strcase"
 )
 
@@ -27,7 +28,7 @@ type (
 	}
 
 	homeManagerShell struct {
-		data *homeManagerOptionsData
+		options []*nix.Option
 		*sync.Once
 	}
 )

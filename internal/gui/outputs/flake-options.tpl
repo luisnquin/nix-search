@@ -1,4 +1,4 @@
-{{ range . }}{{ .option.name }}{{ $desc_len := len .option.description }}{{ if gt $desc_len 50 }}
+{{ range . }}{{ .option.name }}{{ if gt (len .option.description) 50 }}
 {{ .option.description }}{{ else }} - {{ .option.description }}{{ end }}
 
 Flake: {{ .flake.name }}

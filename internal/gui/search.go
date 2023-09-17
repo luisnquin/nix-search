@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"net/url"
 
 	"github.com/luisnquin/nix-search/internal/nix"
 	nix_search "github.com/luisnquin/nix-search/internal/nix/search"
@@ -88,11 +87,6 @@ func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusC
 
 	options, err := g.nixClient.SearchHomeManagerOptions(ctx, input)
 	if err != nil {
-		uerr, ok := err.(*url.Error)
-		if ok && uerr.Timeout() {
-			return "", nil
-		}
-
 		return "", err // TODO: send to terminal screen and do not display context cancelled error
 	}
 

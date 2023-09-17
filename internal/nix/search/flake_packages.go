@@ -33,7 +33,6 @@ type (
 			GitHub *string `json:"github"`
 			Email  string  `json:"email"`
 		} `json:"package_maintainers"`
-		PackageSystem   string   `json:"package_system"`
 		PackageHomePage []string `json:"package_homepage"`
 		PackagePosition *string  `json:"package_position"`
 	}
@@ -53,25 +52,12 @@ func (c Client) SearchFlakePackages(ctx context.Context, flakesBranchId, searchT
 	packages := make([]*nix.FlakePackage, len(response.Hits.Items))
 
 	for i, item := range response.Hits.Items {
-		var homepage *string
-		if len(item.Source.PackageHomePage) > 0 {
-			homepage = &item.Source.PackageHomePage[0]
-		}
 
 		var license *nix.PackageLicense
 		if len(item.Source.PackageLicense) > 0 {
 			license = &nix.PackageLicense{
 				URL:      item.Source.PackageLicense[0].URL,
 				FullName: item.Source.PackageLicense[0].FullName,
-			}
-		}
-
-		maintainers := make([]*nix.PackageMaintainer, len(item.Source.PackageMaintainers))
-		for j, m := range item.Source.PackageMaintainers {
-			maintainers[j] = &nix.PackageMaintainer{
-				Name:   m.Name,
-				GitHub: m.GitHub,
-				Email:  m.Email,
 			}
 		}
 
@@ -97,12 +83,8 @@ func (c Client) SearchFlakePackages(ctx context.Context, flakesBranchId, searchT
 				DefaultOutput:      item.Source.PackageDefaultOutput,
 				Outputs:            item.Source.PackageOutputs,
 				Platforms:          item.Source.PackagePlatforms,
-				System:             item.Source.PackageSystem,
-				Homepage:           homepage,
 				License:            license,
-				Maintainers:        maintainers,
 				RepositoryPosition: item.Source.PackagePosition,
-				Query:              nix.PackageQuery{Score: item.Score},
 			},
 		}
 	}

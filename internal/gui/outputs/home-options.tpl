@@ -1,12 +1,12 @@
-{{ range . }}{{ .title }} - {{ .description }}
+{{ range . }}{{ .name }}{{if gt (len .description) 50 }}
+{{ .description }}{{ else }} - {{.description}}{{ end }}
 
-{{if .note }}Note: {{ .note }}
-
-{{ end }}Type: {{ .type }}
+Type: {{ .type }}
 Example: {{ .example }}
 Default: {{ .default }}
 
-Source: {{ .declared_by }}
+{{ if .long_description }}{{ .long_description }}
+{{ end }}Source: {{ .source }}
 
 --
 {{ end }}

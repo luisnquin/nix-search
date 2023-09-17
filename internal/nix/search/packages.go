@@ -52,25 +52,11 @@ func (c Client) SearchPackages(ctx context.Context, channelBranch, searchTerm st
 	pkgs := make([]*nix.Package, len(response.Hits.Items))
 
 	for i, item := range response.Hits.Items {
-		var homepage *string
-		if len(item.Source.Homepage) > 0 {
-			homepage = &item.Source.Homepage[0]
-		}
-
 		var license *nix.PackageLicense
 		if len(item.Source.License) > 0 {
 			license = &nix.PackageLicense{
 				URL:      item.Source.License[0].URL,
 				FullName: item.Source.License[0].FullName,
-			}
-		}
-
-		maintainers := make([]*nix.PackageMaintainer, len(item.Source.Maintainers))
-		for j, m := range item.Source.Maintainers {
-			maintainers[j] = &nix.PackageMaintainer{
-				Name:   m.Name,
-				GitHub: m.Github,
-				Email:  m.Email,
 			}
 		}
 
@@ -85,12 +71,8 @@ func (c Client) SearchPackages(ctx context.Context, channelBranch, searchTerm st
 			DefaultOutput:      item.Source.DefaultOutput,
 			Outputs:            item.Source.Outputs,
 			Platforms:          item.Source.Platforms,
-			System:             item.Source.System,
-			Homepage:           homepage,
 			License:            license,
-			Maintainers:        maintainers,
 			RepositoryPosition: item.Source.Position,
-			Query:              nix.PackageQuery{Score: item.Score},
 		}
 	}
 

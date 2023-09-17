@@ -1,4 +1,4 @@
-{{ range . }}{{ .package.name }} ({{ .package.version }}){{ $name_len := len .package.name }}{{ $desc_len := len .package.description }}{{ if  or (gt $desc_len 50) (gt $name_len 25)  }}
+{{ range . }}{{ .package.name }} ({{ .package.version }}){{ if or (gt (len .package.description) 50) (gt (len .package.name) 25)  }}
 {{ .package.description }}{{ else }} - {{ .package.description }}{{ end }}
 
 Flake: {{ .flake.name }}
