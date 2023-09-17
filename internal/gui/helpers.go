@@ -25,7 +25,11 @@ func getRenderedText[T any](name, branch, tplText string, items []T) (string, er
 		"transform_source": transformSource,
 		"sub":              func(a, b int) int { return a - b },
 	})
-	tpl = template.Must(tpl.Parse(tplText))
+
+	tpl, err = tpl.Parse(tplText)
+	if err != nil {
+		return "", err
+	}
 
 	var b bytes.Buffer
 

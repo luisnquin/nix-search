@@ -33,29 +33,30 @@ var (
 var ErrChannelNotFound = fmt.Errorf("channel not found")
 
 func (g *GUI) performSearch(ctx context.Context, input string) {
-	g.updateCurrentStatus(SEARCHING)
-
 	results, err := g.performSearchAndGetResults(ctx, input)
-	if err != nil { // TODO: handle error and send to widget
+	if err != nil {
 		g.widgets.resultsBoard.Reset()
+		g.logger.Err(err).Msg("search failed with an error...")
+	} else {
+		g.widgets.resultsBoard.Reset()
+		g.logger.Debug().Str("results", results).Send()
 
-		return
+		if len(results) == 0 {
+			g.widgets.resultsBoard.Write("<no results>")
+		} else {
+			g.widgets.resultsBoard.Write(results)
+		}
 	}
-
-	g.updateCurrentStatus(WAITING)
-
-	g.widgets.resultsBoard.Reset()
-	g.widgets.resultsBoard.Write(results)
 }
 
 func (g *GUI) performSearchAndGetResults(ctx context.Context, input string) (string, error) {
 	defer g.handleProgramPanic()
-	defer g.updateCurrentStatus(WAITING)
 
 	statusChan := make(chan string)
 
 	go func() {
 		for status := range statusChan {
+			g.logger.Trace().Str("search-status", status)
 			g.updateCurrentStatus(status)
 		}
 	}()
@@ -78,6 +79,7 @@ func (g *GUI) performSearchAndGetResults(ctx context.Context, input string) (str
 
 func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
 	defer close(statusChan)
+	defer g.updateCurrentStatus(WAITING)
 
 	if g.nixClient.HomeManagerOptionsAlreadyFetched() {
 		statusChan <- SEARCHING
@@ -97,6 +99,7 @@ func (g GUI) searchHomeManagerOptions(ctx context.Context, input string, statusC
 
 func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
 	defer close(statusChan)
+	defer g.updateCurrentStatus(WAITING)
 
 	channel, found := g.config.Internal.Nix.FindChannel(g.tabs.search.CurrentChannelID)
 	if !found {
@@ -117,6 +120,7 @@ func (g GUI) searchNixOSOptions(ctx context.Context, input string, statusChan ch
 
 func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan chan string) (string, error) {
 	defer close(statusChan)
+	defer g.updateCurrentStatus(WAITING)
 
 	statusChan <- SEARCHING
 
@@ -137,6 +141,7 @@ func (g GUI) searchNixPackages(ctx context.Context, input string, statusChan cha
 
 func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusChan chan string) (string, error) {
 	defer close(statusChan)
+	defer g.updateCurrentStatus(WAITING)
 
 	statusChan <- SEARCHING
 
@@ -152,6 +157,7 @@ func (g GUI) searchNixFlakePackages(ctx context.Context, input string, statusCha
 
 func (g GUI) searchNixFlakeOptions(ctx context.Context, input string, statusChan chan string) (string, error) {
 	defer close(statusChan)
+	defer g.updateCurrentStatus(WAITING)
 
 	statusChan <- SEARCHING
 

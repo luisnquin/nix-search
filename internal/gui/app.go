@@ -72,11 +72,13 @@ func New(logger log.Logger, config *config.Config, nixClient *nix_search.Client)
 		logger:    logger,
 	}
 
+	logger.Trace().Msg("initializing GUI widgets...")
+
 	gui.tabs = &tabs{
 		search: gui.getSelectedOrDefaultTab(),
 	}
 
-	logger.Trace().Msg("initializing GUI widgets...")
+	logger.Trace().Msgf("current search tab: %s", gui.tabs.search.Name)
 
 	if err := gui.initWidgets(); err != nil {
 		logger.Err(err).Msg("an error was detected while initializing GUI widgets")
@@ -111,7 +113,7 @@ func (g GUI) Run(ctx context.Context) error {
 		return err
 	}
 
-	g.logger.Trace().Msg("user exited GUI without errors")
+	g.logger.Trace().Msg("user exited GUI without errors(i guess)")
 
 	return nil
 }
@@ -188,18 +190,23 @@ func (g GUI) run(ctx context.Context) error {
 		termdash.KeyboardSubscriber(func(k *terminalapi.Keyboard) {
 			switch { // keyboard.KeyEsc
 			case k.Key == keyboard.KeyCtrlLsqBracket:
+				g.logger.Trace().Msg("going to previous tab...")
 				g.previousTab()
 
 			case k.Key == keyboard.KeyCtrlRsqBracket:
+				g.logger.Trace().Msg("going to next tab...")
 				g.nextTab()
 
 			case k.Key == keyboard.KeyCtrlSpace:
+				g.logger.Trace().Msg("going to next channel...")
 				g.nextChannel()
 
 			case k.Key == keyboard.KeyCtrlQ:
+				g.logger.Trace().Msg("going to clear search input...")
 				g.clearSearchInput()
 
 			case k.Key == keyboard.KeyCtrlC:
+				g.logger.Trace().Msg("closing application(cancelling root context)...")
 				cancel()
 			}
 		}),

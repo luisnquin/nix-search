@@ -153,7 +153,11 @@ func (g *GUI) nextTab() {
 	index := g.getCurrentTabIndex()
 
 	if index+1 < len(searchTabs) {
-		g.tabs.search = &searchTabs[index+1]
+		tab := searchTabs[index+1]
+
+		g.logger.Trace().Msgf("search tab '%s' -> '%s'", g.tabs.search.Name, tab.Name)
+
+		g.tabs.search = &tab
 		g.updateWidgetTexts()
 	}
 }
@@ -163,7 +167,11 @@ func (g *GUI) previousTab() {
 	index := g.getCurrentTabIndex()
 
 	if index-1 >= 0 {
-		g.tabs.search = &searchTabs[index-1]
+		tab := searchTabs[index-1]
+
+		g.logger.Trace().Msgf("search tab '%s' -> '%s'", g.tabs.search.Name, tab.Name)
+
+		g.tabs.search = &tab
 		g.updateWidgetTexts()
 	}
 }

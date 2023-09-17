@@ -47,6 +47,7 @@ func (g *GUI) initWidgets() error {
 }
 
 func (g *GUI) updateWidgetTexts() error {
+	g.logger.Trace().Msg("updating texts of all the widgets...")
 	g.widgets.resultsBoard.Reset()
 
 	err := g.widgets.currentLabel.Write(g.tabs.search.Label, text.WriteReplace())
@@ -98,13 +99,20 @@ func (g *GUI) handleSearchInputChange(input string) {
 	}
 
 	if g.tabs.search.Name == HOME_MANAGER_OPTIONS && !g.nixClient.HomeManagerOptionsAlreadyFetched() {
+		g.logger.Debug().Str("event", "input-change").Msg("skipping home options search because it wasn't fetched yet")
+
 		return
 	}
+
+	g.logger.Trace().
+		Str("search-tab", g.tabs.search.Name.String()).Str("user-input", input).Msg("performing search...")
 
 	g.performSearch(context.Background(), input)
 }
 
 func (g *GUI) handleSearchInputSubmit(input string) error {
+	g.logger.Trace().
+		Str("search-tab", g.tabs.search.Name.String()).Str("user-input", input).Msg("performing search...")
 	g.performSearch(context.Background(), input)
 
 	return nil
