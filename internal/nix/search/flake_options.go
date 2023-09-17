@@ -18,6 +18,7 @@ type flakeOptionResponseItem struct {
 	OptionSource      *string       `json:"option_source"`
 	OptionDefault     string        `json:"option_default"`
 	OptionExample     *string       `json:"option_example"`
+	OptionType        string        `json:"option_type"`
 }
 
 type flakeOptionsResponse = searchResponse[flakeOptionResponseItem]
@@ -51,6 +52,7 @@ func (c Client) SearchFlakeOptions(ctx context.Context, flakesBranchId, searchTe
 				Example:     item.Source.OptionExample,
 				Default:     item.Source.OptionDefault,
 				Source:      item.Source.OptionSource,
+				Type:        item.Source.OptionType,
 			},
 		}
 	}

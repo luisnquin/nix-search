@@ -14,6 +14,7 @@ type nixosOptionResponseItem struct {
 	Example     *string `json:"option_example"`
 	Default     string  `json:"option_default"`
 	Source      *string `json:"option_source"`
+	Type        string  `json:"option_type"`
 }
 
 type nixosOptionsResponse = searchResponse[nixosOptionResponseItem]
@@ -36,6 +37,7 @@ func (c Client) SearchNixOSOptions(ctx context.Context, channelBranch, searchTer
 			Example:     item.Source.Example,
 			Default:     item.Source.Default,
 			Source:      item.Source.Source,
+			Type:        item.Source.Type,
 		}
 	}
 

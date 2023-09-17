@@ -13,4 +13,6 @@ type Option struct {
 	// The place in https://github.com/NixOS/nixpkgs where
 	// the NixOS option has been declared.
 	Source *string `json:"source"`
+
+	Type string `json:"type"`
 }

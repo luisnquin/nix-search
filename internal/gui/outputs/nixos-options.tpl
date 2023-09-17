@@ -1,6 +1,7 @@
 {{ range . }}{{ .name }}{{ $desc_len := len .description }}{{if gt $desc_len 50 }}
 {{ .description }}{{ else }} - {{.description}}{{ end }}
 
+Type: {{ .type }}
 Example: {{ if .example }}{{ .example }}{{ else }}<nothing>{{ end }}
 Default: {{ .default }}
 
