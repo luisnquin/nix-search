@@ -16,4 +16,4 @@ run: build
     @./build/nix-search
 
 debug-logs:
-    @ if test -f /tmp/nix-search.log; then less +G /tmp/nix-search.log; else echo ".log file not found" && exit 1; fi
+    @ if test -f /tmp/nix-search.log; then less +FG /tmp/nix-search.log; else echo ".log file not found" && exit 1; fi
