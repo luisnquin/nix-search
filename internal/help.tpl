@@ -1,4 +1,4 @@
-{{.CommandName | blue | bold }}{{if .Description}} - {{.Description | yellow }}{{end}}{{if .PrependMessage}}
+{{.CommandName | cyan | bold }}{{if .Description}} - {{.Description | yellow }}{{end}}{{if .PrependMessage}}
 {{.PrependMessage}}{{end}}
 {{if .Subcommands}}
 {{ "Available commands:" | magenta | underline }} {{range .Subcommands}}
