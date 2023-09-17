@@ -32,7 +32,7 @@ type (
 		// The example value of the option.
 		Example string `json:"example"`
 		// The repository file where the option was declared.
-		Position string `json:"declared_by"`
+		DeclaredBy string `json:"declared_by"`
 	}
 )
 
@@ -44,22 +44,11 @@ func (c *Client) SearchHomeManagerOptions(ctx context.Context, searchTerm string
 		return nil, err
 	}
 
-	matchFns := []func(s string, otherS string) bool{
-		strings.HasPrefix, strings.Contains, strings.HasSuffix,
-	}
-
-	for i := range matchFns {
-		matchFn := matchFns[i]
-
-		results := lo.Filter(options, func(option *nix.Option, _ int) bool {
-			return matchFn(option.Name, searchTerm)
-		})
-		if len(results) > 0 {
-			return results, nil
-		}
-	}
-
-	return nil, nil
+	return lo.Filter(options, func(option *nix.Option, index int) bool {
+		return strings.HasPrefix(option.Name, searchTerm) ||
+			strings.HasSuffix(option.Name, searchTerm) ||
+			strings.Contains(option.Name, searchTerm)
+	}), nil
 }
 
 func (c *Client) HomeManagerOptionsAlreadyFetched() bool {
@@ -122,7 +111,7 @@ func (c Client) fetchHomeManagerOptions(ctx context.Context) ([]*nix.Option, err
 			Type:            option.Type,
 			Default:         option.Default,
 			Example:         &example,
-			Source:          lo.ToPtr(rxStrict.FindString(option.Position)),
+			Source:          lo.ToPtr(rxStrict.FindString(option.DeclaredBy)),
 		}
 	}
 
