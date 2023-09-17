@@ -27,7 +27,7 @@ func main() {
 		log.Pretty.Fatal(err.Error())
 	}
 
-	logger, err := log.New(appConfig.LogFile)
+	logger, err := log.New()
 	must(err)
 
 	defer func() {

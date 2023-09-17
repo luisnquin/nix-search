@@ -16,9 +16,7 @@ import (
 )
 
 type Config struct {
-	Internal InternalConfig
-	// The path to the logs file of the program.
-	LogFile    string `yaml:"log_file"`
+	Internal   InternalConfig
 	SearchTabs struct {
 		// The desired order of the search tabs.
 		Order []string `yaml:"order"`
@@ -49,12 +47,6 @@ func Load(test bool) (*Config, error) {
 
 	if err := json.Unmarshal(internalConfig, &c.Internal); err != nil {
 		return nil, err
-	}
-
-	if c.LogFile == "" {
-		c.LogFile = filepath.Join(
-			os.TempDir(), fmt.Sprintf("%s.log", internal.PROGRAM_NAME),
-		)
 	}
 
 	return &c, nil

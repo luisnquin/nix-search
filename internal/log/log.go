@@ -1,10 +1,13 @@
 package log
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/luisnquin/nix-search/internal"
 	"github.com/rs/zerolog"
 )
 
@@ -13,7 +16,11 @@ type Logger struct {
 	io.Closer
 }
 
-func New(logFilePath string) (Logger, error) {
+func New() (Logger, error) {
+	logFilePath := filepath.Join(
+		os.TempDir(), fmt.Sprintf("%s.log", internal.PROGRAM_NAME),
+	)
+
 	info, err := os.Stat(logFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
