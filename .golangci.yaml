@@ -1,0 +1,29 @@
+linters:
+  enable-all: true
+  disable-all: false
+  fast: true
+  disable:
+    - nosnakecase
+    - tagliatelle
+
+linters-settings:
+  depguard:
+    rules:
+      main:
+        files:
+          - "$all"
+          - "!$test"
+        allow:
+          - $gostd # standard library
+          - github.com
+          - gitlab.wiserskills.net/wiserskills/v3
+          - mvdan.cc
+        deny:
+          - pkg: reflect
+            desc: Please don't use this
+  funlen:
+    lines: 100
+    statements: 40
+  lll:
+    tab-width: 1
+    line-length: 140
