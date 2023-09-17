@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/luisnquin/nix-search/internal/config"
@@ -35,12 +34,6 @@ const (
 	ELASTIC_SEARCH_SOURCE = "Elastic Search"
 	MEMORY_SOURCE         = "External file(in-memory)"
 )
-
-func (t searchTabConfig) String() string {
-	const tpl = `{"tab": {"name": "%s", "source": "%s", "wait_for_enter": %v, "channel_ids": %+q, "current_channel_id": "%s"}}`
-
-	return fmt.Sprintf(tpl, t.Name, t.Source, t.WaitForEnter, t.ChannelIDs, t.CurrentChannelID)
-}
 
 func (t searchTab) String() string {
 	switch t {

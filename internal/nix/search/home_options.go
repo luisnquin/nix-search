@@ -48,7 +48,9 @@ func (c *Client) SearchHomeManagerOptions(ctx context.Context, searchTerm string
 		strings.HasPrefix, strings.Contains, strings.HasSuffix,
 	}
 
-	for _, matchFn := range matchFns {
+	for i := range matchFns {
+		matchFn := matchFns[i]
+
 		results := lo.Filter(options, func(option *nix.Option, _ int) bool {
 			return matchFn(option.Name, searchTerm)
 		})
@@ -70,6 +72,7 @@ func (c *Client) getHomeManagerOptions(ctx context.Context) ([]*nix.Option, erro
 	c.store.homeManagerShell.Once.Do(func() {
 		c.store.homeManagerShell.options, err = c.fetchHomeManagerOptions(ctx)
 	})
+
 	if err != nil {
 		return nil, err
 	}

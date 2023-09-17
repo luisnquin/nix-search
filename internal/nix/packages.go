@@ -36,11 +36,11 @@ type (
 	}
 
 	// The list of person who maintains the Nix package.
-	// Maintainers []*PackageMaintainer `json:"maintainers"`
+	// Maintainers []*PackageMaintainer `json:"maintainers"`.
 
 	// PackageMaintainer struct {
 	// 	Name   *string `json:"name"`
 	// 	GitHub *string `json:"github"`
 	// 	Email  string  `json:"email"`
-	// }
+	// }.
 )

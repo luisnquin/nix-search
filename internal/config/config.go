@@ -96,7 +96,6 @@ func (c *Config) validateUserConfig() error {
 		}
 
 		return fmt.Errorf("unknown tabs: %s", strings.Join(unknownTabs, ", "))
-
 	}
 
 	c.SearchTabs.Order = tabsOrder

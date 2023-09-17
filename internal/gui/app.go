@@ -54,7 +54,9 @@ type (
 	}
 )
 
-// Prepare the the GUI components and returns it.
+const REDRAW_INTERVAL = 350 * time.Millisecond
+
+// Prepare the GUI components and returns it.
 func New(logger log.Logger, config *config.Config, nixClient *nix_search.Client) (GUI, error) {
 	terminal, err := tcell.New()
 	if err != nil {
@@ -107,7 +109,7 @@ func (g GUI) Run(ctx context.Context) error {
 		Bool("¿context is nil?", ctx == nil).Msg("starting the program GUI...")
 
 	if err := g.run(ctx); err != nil {
-		g.logger.Err(err).Str("current tab", g.tabs.search.String()).
+		g.logger.Err(err).Str("current tab", g.tabs.search.Name.String()).
 			Msg("error detected while running GUI...")
 
 		return err
@@ -124,6 +126,7 @@ func (g GUI) run(ctx context.Context) error {
 
 	builder := grid.New()
 
+	//nolint:gomnd
 	builder.Add(
 		grid.RowHeightPerc(99,
 			grid.RowHeightFixed(5,
@@ -210,7 +213,7 @@ func (g GUI) run(ctx context.Context) error {
 				cancel()
 			}
 		}),
-		termdash.RedrawInterval(350 * time.Millisecond),
+		termdash.RedrawInterval(REDRAW_INTERVAL),
 	}
 
 	return termdash.Run(ctx, g.terminal, c, termOptions...)

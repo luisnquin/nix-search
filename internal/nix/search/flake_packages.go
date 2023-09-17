@@ -52,7 +52,6 @@ func (c Client) SearchFlakePackages(ctx context.Context, flakesBranchId, searchT
 	packages := make([]*nix.FlakePackage, len(response.Hits.Items))
 
 	for i, item := range response.Hits.Items {
-
 		var license *nix.PackageLicense
 		if len(item.Source.PackageLicense) > 0 {
 			license = &nix.PackageLicense{
