@@ -29,8 +29,8 @@ type InternalConfig struct {
 	Nix NixConfig `json:"nix"`
 }
 
-//go:embed internal.config.json
-var internalConfig []byte
+//go:embed settings.json
+var internalSettings []byte
 
 func Load(test bool) (*Config, error) {
 	var c Config
@@ -45,7 +45,7 @@ func Load(test bool) (*Config, error) {
 		}
 	}
 
-	if err := json.Unmarshal(internalConfig, &c.Internal); err != nil {
+	if err := json.Unmarshal(internalSettings, &c.Internal); err != nil {
 		return nil, err
 	}
 

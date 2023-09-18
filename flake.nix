@@ -23,10 +23,9 @@
             inherit system;
           };
 
-          elasticSearchMappingVersion = lib.fileContents "${nixos-search}/VERSION";
-          lib = nixpkgs.lib;
+          inherit (nixpkgs) lib;
 
-          nixosChannels = let
+          nixElasticSearch = let
             allChannels = (import "${nixos-org-configurations}/channels.nix").channels;
             filteredChannels =
               lib.filterAttrs
@@ -39,6 +38,8 @@
               )
               allChannels;
           in {
+            mappingVersion = toString (lib.fileContents "${nixos-search}/VERSION");
+
             channels =
               lib.mapAttrsToList
               (
@@ -53,7 +54,7 @@
                 }
               )
               filteredChannels;
-            default_channel =
+            defaultChannel =
               builtins.head
               (
                 builtins.sort (e1: e2: ! (builtins.lessThan e1 e2))
@@ -70,7 +71,7 @@
         in rec {
           packages.default = packages.nix-search;
           packages.nix-search = import ./default.nix {
-            inherit pkgs nixosChannels elasticSearchMappingVersion;
+            inherit pkgs nixElasticSearch;
           };
         }
       );
