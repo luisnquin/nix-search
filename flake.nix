@@ -73,6 +73,10 @@
             inherit pkgs nixElasticSearch;
           };
 
+          defaultApp = flake-utils.lib.mkApp {
+            drv = defaultPackage;
+          };
+
           packages.default = packages.nix-search;
           packages.nix-search = import ./default.nix {
             inherit pkgs nixElasticSearch;
