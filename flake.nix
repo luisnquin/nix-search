@@ -69,6 +69,10 @@
               );
           };
         in rec {
+          defaultPackage = pkgs.callPackage ./default.nix {
+            inherit pkgs nixElasticSearch;
+          };
+
           packages.default = packages.nix-search;
           packages.nix-search = import ./default.nix {
             inherit pkgs nixElasticSearch;
