@@ -19,6 +19,7 @@ import (
 	"github.com/mum4k/termdash/terminal/terminalapi"
 	"github.com/mum4k/termdash/widgets/text"
 	"github.com/mum4k/termdash/widgets/textinput"
+	"github.com/samber/lo"
 )
 
 type (
@@ -191,7 +192,7 @@ func (g GUI) run(ctx context.Context) error {
 
 	termOptions := []termdash.Option{
 		termdash.KeyboardSubscriber(func(k *terminalapi.Keyboard) {
-			switch { // keyboard.KeyEsc
+			switch {
 			case k.Key == keyboard.KeyCtrlLsqBracket:
 				g.logger.Trace().Msg("going to previous tab...")
 				g.previousTab()
@@ -204,7 +205,7 @@ func (g GUI) run(ctx context.Context) error {
 				g.logger.Trace().Msg("going to next channel...")
 				g.nextChannel()
 
-			case k.Key == keyboard.KeyCtrlQ:
+			case lo.Contains([]keyboard.Key{keyboard.KeyCtrlQ, keyboard.KeyBackspace}, k.Key):
 				g.logger.Trace().Msg("going to clear search input...")
 				g.clearSearchInput()
 
