@@ -3,6 +3,7 @@ package gui
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/linestyle"
@@ -94,7 +95,7 @@ func (g *GUI) getSearchTextInput() (*textinput.TextInput, error) {
 }
 
 func (g *GUI) handleSearchInputChange(input string) {
-	if g.tabs.search.WaitForEnter {
+	if g.tabs.search.WaitForEnter || strings.TrimSpace(input) == "" {
 		return
 	}
 
@@ -111,6 +112,10 @@ func (g *GUI) handleSearchInputChange(input string) {
 }
 
 func (g *GUI) handleSearchInputSubmit(input string) error {
+	if strings.TrimSpace(input) == "" {
+		return nil
+	}
+
 	g.logger.Trace().
 		Str("search-tab", g.tabs.search.Name.String()).Str("user-input", input).Msg("performing search...")
 	g.performSearch(context.Background(), input)
